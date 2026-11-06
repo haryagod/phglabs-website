@@ -1,0 +1,37 @@
+name: Deploy website
+
+# Every push to main publishes the site to the ShopStock Oracle server (served by ShopStock's Caddy at phglabs.in).
+# Secrets (same values as the ShopStock repo): DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: SSH key
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload and start
+        env:
+          TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+        run: |
+          tar -czf phglabs-site.tgz index.html robots.txt sitemap.xml assets css js branding
+          ssh "$TARGET" 'mkdir -p ~/phglabs/deploy'
+          scp -q phglabs-site.tgz deploy/docker-compose.yml deploy/nginx.conf deploy/phglabs.caddy deploy/update.sh "$TARGET:phglabs/deploy/"
+          ssh "$TARGET" 'cd ~/phglabs/deploy && mkdir -p site && find site -mindepth 1 -delete && tar -xzf phglabs-site.tgz -C site && rm phglabs-site.tgz && sh update.sh'

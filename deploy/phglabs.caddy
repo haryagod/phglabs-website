@@ -1,0 +1,14 @@
+# PHG Labs website: served by ShopStock's Caddy (imported from ~/shopstock/deploy/sites/).
+# Caddy fetches and renews the HTTPS certificates itself once DNS points here.
+phglabs.in {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	reverse_proxy phglabs-web:80
+}
+
+www.phglabs.in {
+	redir https://phglabs.in{uri} permanent
+}

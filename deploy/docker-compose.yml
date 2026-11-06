@@ -1,0 +1,27 @@
+# PHG Labs website: served by ShopStock's Caddy on the same Oracle server.
+# Its own Compose project, so it never touches ShopStock's containers, database or network.
+#
+#   Internet ─443─▶ Caddy (shopstock-cloud) ─┬─ shopstock... ─▶ ShopStock
+#                                            └─ phglabs.in ───▶ phglabs-web (nginx, static files)
+#
+# Only the shared "edge" network connects Caddy to this container. The service name must stay app-prefixed:
+# a service called "frontend", "backend" or "caddy" on "edge" could take ShopStock's traffic.
+name: phglabs
+
+services:
+  phglabs-web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    mem_limit: 32m
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
+    networks: [edge]
+
+networks:
+  edge:
+    external: true
+    name: edge
