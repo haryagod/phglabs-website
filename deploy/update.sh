@@ -5,7 +5,19 @@ set -eu
 cd "$(dirname "$0")"
 
 docker network create edge >/dev/null 2>&1 || true
+
+# Check the nginx config in a throwaway container first, so a mistake never takes the running site down
+docker run --rm -v "$PWD/nginx.conf:/etc/nginx/conf.d/default.conf:ro" -v "$PWD/site:/usr/share/nginx/html:ro" \
+  nginx:1.27-alpine nginx -t -q
+
 docker compose up -d --remove-orphans
+
+# nginx only reads its config at start-up: reload it, or recreate the container if it still sees an old copy of the file
+if [ "$(docker compose exec -T phglabs-web md5sum /etc/nginx/conf.d/default.conf | cut -d' ' -f1)" = "$(md5sum nginx.conf | cut -d' ' -f1)" ]; then
+  docker compose exec -T phglabs-web nginx -s reload
+else
+  docker compose up -d --force-recreate phglabs-web
+fi
 
 # Hand the site file to ShopStock's Caddy and reload it (no restart, no downtime for ShopStock)
 SITES="$HOME/shopstock/deploy/sites"

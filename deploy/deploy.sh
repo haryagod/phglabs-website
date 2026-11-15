@@ -11,10 +11,10 @@ KEY="${DEPLOY_KEY:-$HOME/.ssh/shopstock_deploy}"
 SSH="ssh -i $KEY -o BatchMode=yes"
 
 echo "Packing site..."
-tar -czf /tmp/phglabs-site.tgz index.html robots.txt sitemap.xml assets css js branding
+tar -czf /tmp/phglabs-site.tgz --exclude=play/tools index.html robots.txt ads.txt sitemap.xml assets css js branding play
 echo "Uploading to $USER@$HOST..."
 $SSH "$USER@$HOST" 'mkdir -p ~/phglabs/deploy'
 scp -i "$KEY" -o BatchMode=yes -q /tmp/phglabs-site.tgz deploy/docker-compose.yml deploy/nginx.conf deploy/phglabs.caddy deploy/update.sh "$USER@$HOST:phglabs/deploy/"
 $SSH "$USER@$HOST" 'cd ~/phglabs/deploy && mkdir -p site && find site -mindepth 1 -delete && tar -xzf phglabs-site.tgz -C site && rm phglabs-site.tgz && sh update.sh'
 rm -f /tmp/phglabs-site.tgz
-echo "Done: https://phglabs.in"
+echo "Done: https://phglabs.in and https://play.phglabs.in"

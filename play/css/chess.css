@@ -1,0 +1,28 @@
+/* Chess pages: board theme in PHG Labs colours + layout */
+@import url("/vendor/cm-chessboard/assets/chessboard.css");
+@import url("/vendor/cm-chessboard/assets/extensions/markers/markers.css");
+@import url("/vendor/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css");
+
+.cm-chessboard.phg .board .square.white { fill: #E6E9F7; }
+.cm-chessboard.phg .board .square.black { fill: #7C86C8; }
+.cm-chessboard.phg.border-type-none .board .border { stroke: none; fill: none; }
+.cm-chessboard.phg .coordinates { pointer-events: none; user-select: none; }
+.cm-chessboard.phg .coordinates .coordinate { fill: #3B4380; font-size: 7px; font-weight: 700; cursor: default; }
+.cm-chessboard.phg .coordinates .coordinate.black { fill: #E6E9F7; }
+.cm-chessboard.phg .coordinates .coordinate.white { fill: #5A63A8; }
+.cm-chessboard .markers .marker.marker-square { fill: #FACC15; opacity: .38; }
+.cm-chessboard .markers .marker.marker-frame { stroke: #0E7490; stroke-width: 1.8px; opacity: .8; }
+.cm-chessboard .markers .marker.marker-circle-primary { stroke: #16A34A; stroke-width: 3px; opacity: .9; }
+
+.board-wrap { width: 100%; max-width: 600px; margin: 0 auto; }
+.board-wrap .board-el { width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; box-shadow: 0 30px 60px -25px rgba(0,0,0,.8); touch-action: none; }
+.turn { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #fff; margin-bottom: 12px; min-height: 28px; }
+.turn i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+.turn i.w { background: #fff; } .turn i.b { background: #111; }
+.status { min-height: 52px; }
+.moves { font: 600 .9rem var(--mono); color: var(--muted); max-height: 180px; overflow: auto; line-height: 1.8; }
+.moves b { color: var(--text); margin-right: 4px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { flex: 1; min-width: 44px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-2); color: var(--text); font: 700 .9rem Inter, sans-serif; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--grad); color: #fff; border-color: transparent; }
+.panel h3 { margin-bottom: 10px; }

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bug Hunt: Find the Bug in JavaScript Code | PHG Labs Play</title>
+  <meta name="description" content="Spot the one broken line in each JavaScript program. 15 debugging levels covering off-by-one errors, async/await, closures, sorting and more, each with the fix explained.">
+  <link rel="canonical" href="https://play.phglabs.in/bug-hunt/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+  <script src="/js/code.js" defer></script>
+  <script src="/data/bug-hunt.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Code game · Debugging</span>
+      <h1>Bug Hunt 🐞</h1>
+      <p>Each program below has exactly one bug. Read what the code should do, then click the line that breaks it.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel" id="game">
+        <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+        <h2 style="margin:16px 0 4px" id="level-title"></h2>
+        <p class="muted" style="margin:0 0 12px">Click the line with the bug.</p>
+        <div id="code"></div>
+        <div id="feedback"></div>
+        <div class="btn-row" style="margin-top:14px"><button class="btn hidden" id="next">Next level →</button></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Level</small><b id="s-level">1</b></div>
+          <div class="stat"><small>Score</small><b id="s-score">0</b></div>
+          <div class="stat"><small>Best</small><b id="s-best">–</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+        <div class="panel howto">
+          <h2>How to play</h2>
+          <ul>
+            <li>The comment on the last line (or the function name) tells you what the code should do.</li>
+            <li>Click the line you think is wrong.</li>
+            <li>Find it on the first try for a point.</li>
+            <li>After each level you see the fixed line and why it was broken.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>Learn to debug like a professional</h2>
+      <p>Developers spend more time reading and fixing code than writing it. Spotting a bug quickly is a real skill, and it comes from knowing the common mistakes. Bug Hunt trains you on the ones we see most often in real projects:</p>
+      <ul>
+        <li><strong>Off-by-one errors:</strong> loops that run one time too many or too few.</li>
+        <li><strong>Wrong starting values:</strong> such as starting a maximum at 0.</li>
+        <li><strong>= vs ===:</strong> assigning when you meant to compare.</li>
+        <li><strong>Missing await:</strong> using a Promise as if it were the data.</li>
+        <li><strong>Object equality:</strong> two objects that look the same are not equal.</li>
+        <li><strong>Closures and this:</strong> var in loops, and functions that lose <code>this</code>.</li>
+      </ul>
+      <p>Each level is short and has exactly one bug, so you can practise in a few minutes a day.</p>
+    </section>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var L = window.BUG_HUNT, i = 0, score = 0, firstTry = true, solved = false;
+  var $ = function (id) { return document.getElementById(id); };
+  function stats() {
+    $("s-level").textContent = Math.min(i + 1, L.length) + "/" + L.length;
+    $("s-score").textContent = score;
+    var b = PLAY.getBest("bug-hunt"); $("s-best").textContent = b === null ? "–" : b;
+    if ($("bar")) $("bar").style.width = (i / L.length * 100) + "%";
+  }
+  function level() {
+    var l = L[i]; firstTry = true; solved = false;
+    $("level-title").textContent = (i + 1) + ". " + l.title;
+    renderCode($("code"), l.code, true);
+    $("feedback").innerHTML = ""; $("next").classList.add("hidden");
+    $("code").querySelectorAll(".ln").forEach(function (ln) {
+      var go = function () { pick(ln); };
+      ln.addEventListener("click", go);
+      ln.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+    });
+    stats();
+  }
+  function pick(ln) {
+    if (solved) return;
+    var l = L[i], n = +ln.dataset.line;
+    if (n === l.bug) {
+      solved = true;
+      if (firstTry) score++;
+      ln.classList.add("picked-good");
+      $("feedback").innerHTML = '<div class="feedback good"><strong>' + (firstTry ? "Found it! +1" : "Found it!") + "</strong> " + l.explain +
+        '<p style="margin:10px 0 4px" class="muted">Fixed line ' + l.bug + ':</p><div class="code" id="fix"></div></div>';
+      renderCode($("fix"), l.fix, false);
+      $("fix").querySelector(".n").textContent = l.bug;
+      $("next").textContent = i === L.length - 1 ? "See my result →" : "Next level →";
+      $("next").classList.remove("hidden");
+    } else {
+      firstTry = false;
+      ln.classList.add("picked-bad");
+      $("feedback").innerHTML = '<div class="feedback bad"><strong>Line ' + n + ' is fine.</strong> Keep looking. Think about what the code should produce.</div>';
+    }
+    stats();
+  }
+  function finish() {
+    var isBest = PLAY.best("bug-hunt", score);
+    $("bar").style.width = "100%";
+    $("game").innerHTML = "<h2>You found " + score + " / " + L.length + " bugs on the first try</h2>" +
+      "<p>" + (score >= 13 ? "Sharp eyes! You debug like a pro." : score >= 9 ? "Nice work. Read the explanations for the ones you missed." : "Debugging takes practice. Play again and the patterns will start to jump out.") + "</p>" +
+      (isBest ? '<p class="grad"><strong>New personal best!</strong></p>' : "") +
+      '<div class="btn-row"><button class="btn" id="again">Play again</button><button class="btn btn-ghost" id="share">Share score</button><a class="btn btn-ghost" href="/output-guess/">Try Output Guess →</a></div>';
+    $("again").onclick = function () { location.reload(); };
+    $("share").onclick = function () { PLAY.share("I found " + score + "/" + L.length + " bugs on Bug Hunt, a debugging game on PHG Labs Play. Can you beat me?"); };
+    stats();
+  }
+  $("next").onclick = function () { i++; if (i < L.length) level(); else finish(); };
+  level();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Chess Puzzle: A New Puzzle Every Day | PHG Labs Play</title>
+  <meta name="description" content="Today's free chess puzzle. A new tactic every day, the same for everyone. Solve it, build your streak and share your result with friends.">
+  <link rel="canonical" href="https://play.phglabs.in/chess/daily/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/chess.css">
+  <script src="/js/core.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow" id="date">Daily puzzle</span>
+      <h1>Today's Chess Puzzle</h1>
+      <p>One puzzle a day, the same for everyone. Solve it without mistakes to keep a perfect streak, then share your result.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel">
+        <div class="turn" id="turn"></div>
+        <div class="board-wrap"><div class="board-el" id="board"></div></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Streak</small><b id="s-streak">0</b></div>
+          <div class="stat"><small>Rating</small><b id="s-rating">–</b></div>
+          <div class="stat"><small>Mistakes</small><b id="s-mistakes">0</b></div>
+        </div>
+        <div class="panel status">
+          <div id="status" aria-live="polite"></div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-sm btn-ghost" id="hint">💡 Hint</button>
+            <button class="btn btn-sm btn-ghost" id="solution">Show solution</button>
+            <button class="btn btn-sm hidden" id="share">Share result</button>
+          </div>
+        </div>
+        <div class="panel"><p style="margin:0">Want more? <a href="/chess/puzzles/">Train with 2,400 puzzles →</a></p></div>
+        <div class="ad" data-slot="side"></div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>Why a daily puzzle?</h2>
+      <p>Getting better at chess is mostly about steady practice. Ten focused minutes every day beats a three-hour session once a month. The daily puzzle gives you one good tactic to think about, and the streak helps you build the habit.</p>
+      <p>Everyone gets the same puzzle on the same day, so you can challenge friends and family. Did they solve it without a mistake?</p>
+      <p class="muted">A new puzzle appears at midnight your time. Puzzles are from the <a href="https://database.lichess.org/#puzzles" rel="noopener">Lichess puzzle database</a> (CC0).</p>
+    </section>
+  </div>
+</main>
+<script type="module">
+  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js";
+  const $ = (id) => document.getElementById(id);
+  const day = PLAY.dayNumber();
+  $("date").textContent = "Daily puzzle · " + new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const list = await loadPuzzles("medium");
+  // 7919 is prime, so this walks through every puzzle in a fixed, shuffled-looking order before repeating
+  const row = list[((day % list.length) * 7919) % list.length];
+  const state = PLAY.dailyState("chess-daily");
+  $("s-streak").textContent = state.streak;
+  $("s-rating").textContent = row[3];
+  const board = createBoard($("board"), undefined, "w");
+  let run, finished = false;
+
+  function onState(s) {
+    if (s.player) $("turn").innerHTML = `<i class="${s.player}"></i> You play ${s.player === "w" ? "White" : "Black"}`;
+    $("s-mistakes").textContent = s.mistakes || 0;
+    if (s.status === "loading") $("status").innerHTML = "<strong>Watch your opponent's move…</strong>";
+    if (s.status === "your-move") $("status").innerHTML = `<strong>Your move.</strong> Find the best move for ${s.player === "w" ? "White" : "Black"}.`;
+    if (s.status === "correct") $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…';
+    if (s.status === "wrong") $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again.';
+    if ((s.status === "solved" || s.status === "shown") && !finished) {
+      finished = true;
+      const themes = explainThemes(row[4]);
+      let head;
+      if (s.status === "solved") {
+        const r = PLAY.markDaily("chess-daily");
+        $("s-streak").textContent = r.streak;
+        head = `<strong style="color:#4ADE80">${s.mistakes ? "✓ Solved!" : "🎉 Solved, perfectly!"}</strong> ${r.streak > 1 ? r.streak + "-day streak 🔥" : "Come back tomorrow for the next one."}`;
+      } else head = "<strong>Here's the solution.</strong> Come back tomorrow for a new puzzle.";
+      $("status").innerHTML = head + (themes ? `<ul style="margin:10px 0 0;padding-left:1.1em">${themes}</ul>` : "");
+      $("share").classList.remove("hidden");
+      $("share").onclick = () => PLAY.share(`♟ PHG Labs daily chess puzzle #${day + 1}: ${s.status === "shown" ? "❌ needed the solution" : s.mistakes ? "✅ solved with " + s.mistakes + " mistake" + (s.mistakes > 1 ? "s" : "") : "✅ solved first try!"}`);
+    }
+  }
+  run = runPuzzle(board, row, onState);
+  $("hint").onclick = () => run.hint();
+  $("solution").onclick = () => run.showSolution();
+</script>
+</body>
+</html>

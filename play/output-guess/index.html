@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Output Guess: JavaScript Output Questions with Answers | PHG Labs Play</title>
+  <meta name="description" content="Guess what each JavaScript snippet prints. 15 levels of tricky JavaScript output questions with clear explanations, great for interviews and placement prep.">
+  <link rel="canonical" href="https://play.phglabs.in/output-guess/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+  <script src="/js/code.js" defer></script>
+  <script src="/data/output-guess.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Code game · JavaScript</span>
+      <h1>Output Guess</h1>
+      <p>Read the code and pick what it prints. Some questions look easy, but many hide a trap that catches experienced developers.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel" id="game">
+        <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+        <h2 style="margin:16px 0 10px" id="level-title">Level 1</h2>
+        <div id="code"></div>
+        <p class="muted" style="margin:14px 0 0">What does this print?</p>
+        <div class="choices" id="choices"></div>
+        <div id="feedback"></div>
+        <div class="btn-row" style="margin-top:14px"><button class="btn hidden" id="next">Next level →</button></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Level</small><b id="s-level">1</b></div>
+          <div class="stat"><small>Score</small><b id="s-score">0</b></div>
+          <div class="stat"><small>Best</small><b id="s-best">–</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+        <div class="panel howto">
+          <h2>How to play</h2>
+          <ul>
+            <li>Read the JavaScript snippet carefully.</li>
+            <li>Pick the exact output, as it would appear in the console.</li>
+            <li>You get a point for each first-try answer.</li>
+            <li>Every answer comes with a short explanation.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>Why practise JavaScript output questions?</h2>
+      <p>"What will this code print?" is one of the most common questions in coding interviews and campus placements. It checks whether you really understand how the language behaves, not just whether you can memorise syntax.</p>
+      <p>These levels cover the ideas that trip people up most often: <strong>type conversion</strong> (why <code>2 + "2"</code> is <code>"22"</code>), <strong>floating-point numbers</strong>, <strong>references vs copies</strong>, <strong>var vs let</strong>, <strong>sorting</strong>, <strong>automatic semicolons</strong> and the <strong>event loop</strong> (promises vs setTimeout).</p>
+      <p>Tip: when you get one wrong, open your browser console (F12) and run the code yourself. Changing it a little and running it again is the fastest way to learn.</p>
+    </section>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var Q = window.OUTPUT_GUESS, i = 0, score = 0, firstTry = true;
+  var $ = function (id) { return document.getElementById(id); };
+  function stats() {
+    $("s-level").textContent = Math.min(i + 1, Q.length) + "/" + Q.length;
+    $("s-score").textContent = score;
+    var b = PLAY.getBest("output-guess"); $("s-best").textContent = b === null ? "–" : b;
+    if ($("bar")) $("bar").style.width = (i / Q.length * 100) + "%";
+  }
+  function level() {
+    var q = Q[i]; firstTry = true;
+    $("level-title").textContent = "Level " + (i + 1);
+    renderCode($("code"), q.code, false);
+    $("feedback").innerHTML = ""; $("next").classList.add("hidden");
+    $("choices").innerHTML = "";
+    PLAY.shuffle(q.choices.slice()).forEach(function (c) {
+      var b = document.createElement("button");
+      b.className = "choice"; b.style.whiteSpace = "pre"; b.textContent = c;
+      b.onclick = function () { pick(b, c); };
+      $("choices").appendChild(b);
+    });
+    stats();
+  }
+  function pick(btn, c) {
+    var q = Q[i];
+    if (c === q.answer) {
+      if (firstTry) score++;
+      document.querySelectorAll(".choice").forEach(function (b) { b.disabled = true; });
+      btn.classList.add("right");
+      $("feedback").innerHTML = '<div class="feedback good"><strong>' + (firstTry ? "Correct! +1" : "That's it.") + "</strong> " + q.explain + "</div>";
+      $("next").textContent = i === Q.length - 1 ? "See my result →" : "Next level →";
+      $("next").classList.remove("hidden");
+    } else {
+      firstTry = false;
+      btn.classList.add("wrong"); btn.disabled = true;
+      $("feedback").innerHTML = '<div class="feedback bad"><strong>Not quite.</strong> Try another answer.</div>';
+    }
+    stats();
+  }
+  function finish() {
+    var isBest = PLAY.best("output-guess", score);
+    $("bar").style.width = "100%";
+    $("game").innerHTML = '<h2>You scored ' + score + " / " + Q.length + "</h2>" +
+      "<p>" + (score >= 13 ? "Excellent! You really know your JavaScript." : score >= 9 ? "Good job! A few traps got you; read the explanations again." : "JavaScript is full of surprises. Try again, and the explanations will stick.") + "</p>" +
+      (isBest ? '<p class="grad"><strong>New personal best!</strong></p>' : "") +
+      '<div class="btn-row"><button class="btn" id="again">Play again</button><button class="btn btn-ghost" id="share">Share score</button><a class="btn btn-ghost" href="/bug-hunt/">Try Bug Hunt →</a></div>';
+    $("again").onclick = function () { location.reload(); };
+    $("share").onclick = function () { PLAY.share("I scored " + score + "/" + Q.length + " on Output Guess, a JavaScript challenge on PHG Labs Play. Can you beat me?"); };
+    stats();
+  }
+  $("next").onclick = function () { i++; if (i < Q.length) level(); else finish(); };
+  level();
+});
+</script>
+</body>
+</html>

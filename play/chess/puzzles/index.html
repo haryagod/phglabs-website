@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess Puzzles Online Free: Easy to Hard Tactics | PHG Labs Play</title>
+  <meta name="description" content="Solve free chess puzzles online: 2,400 hand-picked tactics with forks, pins, skewers and mates in 2 and 3. Choose easy, medium or hard, with hints and solutions.">
+  <link rel="canonical" href="https://play.phglabs.in/chess/puzzles/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/chess.css">
+  <script src="/js/core.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Chess · Tactics</span>
+      <h1>Chess Puzzle Trainer</h1>
+      <p>Find the best move. Each puzzle comes from a real game. Your opponent has just moved, and now it's your turn to strike.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel">
+        <div class="turn" id="turn"></div>
+        <div class="board-wrap"><div class="board-el" id="board"></div></div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <h3>Difficulty</h3>
+          <div class="seg" id="levels" role="group" aria-label="Difficulty">
+            <button data-level="easy">Easy</button><button data-level="medium">Medium</button><button data-level="hard">Hard</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><small>Rating</small><b id="s-rating">–</b></div>
+          <div class="stat"><small>Solved</small><b id="s-solved">0</b></div>
+          <div class="stat"><small>Streak</small><b id="s-streak">0</b></div>
+        </div>
+        <div class="panel status">
+          <div id="status" aria-live="polite"></div>
+          <div class="btn-row" style="margin-top:12px">
+            <button class="btn btn-sm btn-ghost" id="hint">💡 Hint</button>
+            <button class="btn btn-sm btn-ghost" id="solution">Show solution</button>
+            <button class="btn btn-sm" id="next">Next puzzle →</button>
+          </div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>How chess puzzles make you better</h2>
+      <p>Most games between club players are decided by <strong>tactics</strong>: short, forcing sequences that win material or give checkmate. Solving puzzles trains your eye to spot these patterns in your own games, which is why coaches recommend a few puzzles every day.</p>
+      <h2>The patterns you'll practise</h2>
+      <ul>
+        <li><strong>Fork:</strong> one piece attacks two at once. Knights are famous for it.</li>
+        <li><strong>Pin:</strong> a piece can't move without exposing a more valuable piece behind it.</li>
+        <li><strong>Skewer:</strong> the valuable piece is in front, so when it moves, the piece behind is lost.</li>
+        <li><strong>Discovered attack:</strong> moving one piece reveals an attack from another.</li>
+        <li><strong>Back-rank mate:</strong> a king trapped behind its own pawns is mated on the back row.</li>
+        <li><strong>Sacrifice and deflection:</strong> give something up to pull a defender away.</li>
+      </ul>
+      <p>Tip: before moving, look for <em>checks, captures and threats</em>, in that order. Forcing moves are usually the key to a puzzle.</p>
+      <p class="muted">Puzzles are from the <a href="https://database.lichess.org/#puzzles" rel="noopener">Lichess puzzle database</a> (CC0). Ratings are Lichess puzzle ratings.</p>
+    </section>
+  </div>
+</main>
+<script type="module">
+  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js";
+  const $ = (id) => document.getElementById(id);
+  let level = PLAY.load("chess-level", "easy"), run, row, solved = PLAY.load("chess-solved", 0), streak = 0, finished = false;
+  const board = createBoard($("board"), undefined, "w");
+
+  function setLevel(l) {
+    level = l; PLAY.save("chess-level", l);
+    document.querySelectorAll("[data-level]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.level === l));
+  }
+  function stats() { $("s-solved").textContent = solved; $("s-streak").textContent = streak; }
+  function turnLabel(player) { $("turn").innerHTML = `<i class="${player}"></i> You play ${player === "w" ? "White" : "Black"}`; }
+
+  async function next() {
+    if (run) run.stop();
+    finished = false;
+    const list = await loadPuzzles(level);
+    row = list[Math.floor(Math.random() * list.length)];
+    $("s-rating").textContent = row[3];
+    $("status").innerHTML = "<strong>Watch your opponent's move…</strong>";
+    run = runPuzzle(board, row, onState);
+  }
+  function onState(s) {
+    if (s.player) turnLabel(s.player);
+    if (s.status === "your-move") $("status").innerHTML = `<strong>Your move.</strong> Find the best move for ${s.player === "w" ? "White" : "Black"}.`;
+    if (s.status === "correct") $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…';
+    if (s.status === "wrong") { streak = 0; stats(); $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again, or use a hint.'; }
+    if (s.status === "solved" || s.status === "shown") {
+      if (finished) return;
+      finished = true;
+      const clean = s.status === "solved" && s.mistakes === 0;
+      if (s.status === "solved") { solved++; PLAY.save("chess-solved", solved); }
+      streak = clean ? streak + 1 : 0;
+      stats();
+      const themes = explainThemes(row[4]);
+      $("status").innerHTML = (s.status === "solved"
+        ? `<strong style="color:#4ADE80">${clean ? "🎉 Solved, perfectly!" : "✓ Solved!"}</strong>`
+        : "<strong>Here's the solution.</strong>") + (themes ? `<ul style="margin:10px 0 0;padding-left:1.1em">${themes}</ul>` : "");
+    }
+  }
+  document.querySelectorAll("[data-level]").forEach((b) => (b.onclick = () => { setLevel(b.dataset.level); next(); }));
+  $("hint").onclick = () => run && run.hint();
+  $("solution").onclick = () => run && run.showSolution();
+  $("next").onclick = next;
+  setLevel(level); stats(); next();
+</script>
+</body>
+</html>

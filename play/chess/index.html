@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Free Chess: Daily Puzzle, Puzzle Trainer &amp; Play vs Computer | PHG Labs Play</title>
+  <meta name="description" content="Play free chess in your browser: a daily chess puzzle, 2,400 tactics from easy to hard, and full games against the Stockfish engine at five levels. No sign-up.">
+  <link rel="canonical" href="https://play.phglabs.in/chess/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <section class="hero">
+      <span class="eyebrow">Free chess · No sign-up</span>
+      <h1>Chess at <span class="grad">PHG Labs Play</span></h1>
+      <p>Solve today's puzzle, sharpen your tactics, or play a full game against one of the strongest chess engines in the world.</p>
+    </section>
+    <div class="grid">
+      <a class="game-card" href="/chess/daily/"><div class="icon">📅</div><h3>Daily Puzzle</h3><p>A new puzzle every day, the same for everyone. Build your streak and share your result.</p><span class="meta" id="daily-meta">New every day</span></a>
+      <a class="game-card" href="/chess/puzzles/"><div class="icon">🎯</div><h3>Puzzle Trainer</h3><p>2,400 real-game tactics in three levels, with hints, solutions and a short explanation of each pattern.</p><span class="meta">Easy · Medium · Hard</span></a>
+      <a class="game-card" href="/chess/play/"><div class="icon">🤖</div><h3>Play the Computer</h3><p>A full game against Stockfish, from beginner-friendly to very strong. Play as White or Black.</p><span class="meta">5 levels</span></a>
+    </div>
+    <div class="ad" data-slot="chess-hub" style="margin-top:24px"></div>
+    <section class="section card prose">
+      <h2>New to chess? The basics in two minutes</h2>
+      <p>Chess is played on an 8×8 board. White moves first, then the players take turns. The goal is <strong>checkmate</strong>: attacking the enemy king so that it cannot escape.</p>
+      <ul>
+        <li><strong>King:</strong> one square in any direction. It can never move into check.</li>
+        <li><strong>Queen:</strong> any number of squares in a straight line or diagonally. It's the most powerful piece.</li>
+        <li><strong>Rook:</strong> any number of squares in a straight line (up, down, left, right).</li>
+        <li><strong>Bishop:</strong> any number of squares diagonally. It always stays on its starting colour.</li>
+        <li><strong>Knight:</strong> an "L" shape (two squares one way, one square to the side). It is the only piece that jumps over others.</li>
+        <li><strong>Pawn:</strong> moves forward one square (two on its first move) but captures diagonally. A pawn that reaches the far side becomes any piece, usually a queen.</li>
+      </ul>
+      <h2>Three special moves</h2>
+      <ul>
+        <li><strong>Castling:</strong> the king moves two squares toward a rook, and the rook jumps to the other side of it. It's allowed only if neither piece has moved, the squares between are empty, and the king is not in, through or into check.</li>
+        <li><strong>En passant:</strong> if a pawn moves two squares and lands beside your pawn, you may capture it as if it had moved one square, but only on the very next move.</li>
+        <li><strong>Promotion:</strong> a pawn reaching the last rank turns into a queen, rook, bishop or knight.</li>
+      </ul>
+      <h2>Simple tips that win games</h2>
+      <ol>
+        <li>Control the centre with pawns and pieces early.</li>
+        <li>Develop your knights and bishops before moving the queen.</li>
+        <li>Castle early to keep your king safe.</li>
+        <li>Before every move, ask: what does my opponent threaten?</li>
+      </ol>
+      <p>Chess is believed to have started in India as <em>chaturanga</em> around the 6th century, so it's a game with deep roots here.</p>
+    </section>
+  </div>
+</main>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var d = PLAY.dailyState("chess-daily");
+    if (d.doneToday) document.getElementById("daily-meta").textContent = "✓ Solved today · " + d.streak + "-day streak";
+  });
+</script>
+</body>
+</html>
