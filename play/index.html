@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PHG Labs Play: Free Coding Games, Puzzles, Brain Tests &amp; Chess</title>
+  <meta name="description" content="Free browser games that make you sharper: coding challenges, Sudoku, number series, reaction and memory tests, daily chess puzzles and chess against the computer. No sign-up.">
+  <link rel="canonical" href="https://play.phglabs.in/">
+  <meta property="og:title" content="PHG Labs Play: free games for curious minds">
+  <meta property="og:description" content="Coding games, puzzles, brain tests and chess. Free, in your browser, no sign-up.">
+  <meta property="og:url" content="https://play.phglabs.in/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <section class="hero">
+      <span class="eyebrow">Free · No sign-up · Works on your phone</span>
+      <h1>Games that make you <span class="grad">sharper</span></h1>
+      <p>Learn to read code, train your logic, test your reflexes and solve a chess puzzle a day. Everything runs in your browser, and your scores stay on your device.</p>
+      <div class="btn-row">
+        <a class="btn" href="/chess/daily/">♟ Today's chess puzzle</a>
+        <a class="btn btn-ghost" href="/output-guess/">Try a coding game</a>
+      </div>
+    </section>
+
+    <div class="ad" data-slot="home-top"></div>
+
+    <section class="section" id="code">
+      <div class="section-head"><h2>💻 Code games</h2><span class="muted">For students, job seekers and anyone learning to code</span></div>
+      <div class="grid">
+        <a class="game-card" href="/output-guess/"><div class="icon">❓</div><h3>Output Guess</h3><p>Read a short JavaScript snippet and pick what it prints. Every answer comes with an explanation.</p><span class="meta" data-best="output-guess" data-unit="/15">15 levels</span></a>
+        <a class="game-card" href="/bug-hunt/"><div class="icon">🐞</div><h3>Bug Hunt</h3><p>Each program has exactly one bug. Click the broken line, then see how to fix it.</p><span class="meta" data-best="bug-hunt" data-unit="/15">15 levels</span></a>
+      </div>
+    </section>
+
+    <section class="section" id="puzzles">
+      <div class="section-head"><h2>🧩 Puzzles</h2><span class="muted">Logic and numbers</span></div>
+      <div class="grid">
+        <a class="game-card" href="/sudoku/"><div class="icon">🔢</div><h3>Sudoku</h3><p>Endless, freshly generated grids with a single solution each. Easy, medium and hard.</p><span class="meta">Unlimited puzzles</span></a>
+        <a class="game-card" href="/number-series/"><div class="icon">📈</div><h3>Number Series</h3><p>Find the next number. The same reasoning questions asked in aptitude and placement tests.</p><span class="meta" data-best="number-series" data-unit=" pts">Aptitude practice</span></a>
+      </div>
+    </section>
+
+    <section class="section" id="brain">
+      <div class="section-head"><h2>⚡ Brain tests</h2><span class="muted">How quick and sharp are you today?</span></div>
+      <div class="grid">
+        <a class="game-card" href="/reflex/"><div class="icon">⚡</div><h3>Reflex Test</h3><p>Tap the moment the screen turns green. Five tries, and we show your average in milliseconds.</p><span class="meta" data-best="reflex" data-unit=" ms">Reaction time</span></a>
+        <a class="game-card" href="/digit-memory/"><div class="icon">🧠</div><h3>Digit Memory</h3><p>Remember a number shown for a moment. It grows one digit every round.</p><span class="meta" data-best="digit-memory" data-unit=" digits">Working memory</span></a>
+      </div>
+    </section>
+
+    <section class="section" id="chess">
+      <div class="section-head"><h2>♟ Chess</h2><a href="/chess/">All chess →</a></div>
+      <div class="grid">
+        <a class="game-card" href="/chess/daily/"><div class="icon">📅</div><h3>Daily Puzzle</h3><p>One puzzle a day, the same for everyone. Keep your streak going.</p><span class="meta" id="daily-meta">New puzzle every day</span></a>
+        <a class="game-card" href="/chess/puzzles/"><div class="icon">🎯</div><h3>Puzzle Trainer</h3><p>2,400 hand-picked tactics: forks, pins, mates in 2 and more, from easy to hard.</p><span class="meta">3 difficulty levels</span></a>
+        <a class="game-card" href="/chess/play/"><div class="icon">🤖</div><h3>Play the Computer</h3><p>Play a full game against Stockfish, one of the strongest chess engines, at the level you choose.</p><span class="meta">5 levels</span></a>
+      </div>
+    </section>
+
+    <section class="section card prose">
+      <h2>About PHG Labs Play</h2>
+      <p>PHG Labs Play is a free collection of brain games made by <a href="https://phglabs.in/">PHG Labs</a>, a software company in Karad, Maharashtra. We build business software like AyurOS and Shop Stock, and we made this site because we love puzzles as much as code.</p>
+      <p>There are no accounts and no downloads. Your best scores and streaks are saved only in your browser. New games are added regularly, so check back soon.</p>
+    </section>
+
+    <div class="ad" data-slot="home-bottom"></div>
+  </div>
+</main>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-best]").forEach(function (el) {
+      var b = PLAY.getBest(el.dataset.best);
+      if (b !== null) el.textContent = "Your best: " + b + el.dataset.unit;
+    });
+    var d = PLAY.dailyState("chess-daily");
+    if (d.doneToday) document.getElementById("daily-meta").textContent = "✓ Solved today · " + d.streak + "-day streak";
+    else if (d.streak) document.getElementById("daily-meta").textContent = "Keep your " + d.streak + "-day streak alive";
+  });
+</script>
+</body>
+</html>

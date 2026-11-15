@@ -12,3 +12,13 @@ phglabs.in {
 www.phglabs.in {
 	redir https://phglabs.in{uri} permanent
 }
+
+# Free games subdomain, served by the same nginx container (server_name play.phglabs.in)
+play.phglabs.in {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+	reverse_proxy phglabs-web:80
+}

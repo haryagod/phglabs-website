@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Free Sudoku Online: Easy, Medium &amp; Hard | PHG Labs Play</title>
+  <meta name="description" content="Play free Sudoku online with unlimited new puzzles. Every grid has exactly one solution. Choose easy, medium or hard, with conflict highlighting, hints and a timer.">
+  <link rel="canonical" href="https://play.phglabs.in/sudoku/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+  <style>
+    .sudoku { display: grid; grid-template-columns: repeat(9, 1fr); width: 100%; max-width: 520px; aspect-ratio: 1; margin: 0 auto; border: 3px solid #A5B4FC; border-radius: 12px; overflow: hidden; background: #0A0F24; user-select: none; }
+    .sudoku button { border: 0; border-right: 1px solid rgba(255,255,255,.12); border-bottom: 1px solid rgba(255,255,255,.12); background: transparent; color: #67E8F9;
+      font: 600 clamp(1.1rem, 5vw, 1.7rem) Inter, sans-serif; padding: 0; cursor: pointer; aspect-ratio: 1; }
+    .sudoku button.given { color: #fff; font-weight: 800; }
+    .sudoku button:nth-child(9n+3), .sudoku button:nth-child(9n+6) { border-right: 2px solid #A5B4FC; }
+    .sudoku button:nth-child(n+19):nth-child(-n+27), .sudoku button:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #A5B4FC; }
+    .sudoku button.peer { background: rgba(99,102,241,.12); }
+    .sudoku button.same { background: rgba(34,211,238,.18); }
+    .sudoku button.sel { background: rgba(99,102,241,.45); }
+    .sudoku button.conflict { color: #F87171; background: rgba(239,68,68,.15); }
+    .pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-width: 520px; margin: 14px auto 0; }
+    .pad button { padding: 12px 0; border-radius: 10px; border: 1px solid var(--line); background: var(--card-2); color: #fff; font: 700 1.2rem Inter, sans-serif; cursor: pointer; }
+    .pad button:hover { border-color: var(--cyan); }
+    .levels { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; justify-content: center; }
+    .levels .btn[aria-pressed="true"] { outline: 2px solid var(--cyan); }
+  </style>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Puzzle · Logic</span>
+      <h1>Sudoku</h1>
+      <p>Fill the grid so every row, every column and every 3×3 box contains the numbers 1 to 9 exactly once. Every puzzle is freshly generated and has exactly one solution.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel">
+        <div class="levels" role="group" aria-label="Difficulty">
+          <button class="btn btn-sm btn-ghost" data-level="easy">Easy</button>
+          <button class="btn btn-sm btn-ghost" data-level="medium">Medium</button>
+          <button class="btn btn-sm btn-ghost" data-level="hard">Hard</button>
+        </div>
+        <div class="sudoku" id="grid" aria-label="Sudoku grid"></div>
+        <div class="pad" id="pad"></div>
+        <div id="feedback" style="max-width:520px;margin:0 auto"></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Time</small><b id="s-time">0:00</b></div>
+          <div class="stat"><small>Hints</small><b id="s-hints">0</b></div>
+          <div class="stat"><small>Best</small><b id="s-best">–</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+        <div class="panel howto">
+          <h2>How to play</h2>
+          <ul>
+            <li>Tap a square, then tap a number (or type 1–9 on a keyboard).</li>
+            <li>Red numbers break a rule: the same number twice in a row, column or box.</li>
+            <li>Use <strong>Hint</strong> to fill the selected square, or <strong>⌫</strong> to clear it.</li>
+            <li>Arrow keys move the selection.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>Sudoku tips for beginners</h2>
+      <ol>
+        <li><strong>Scan for singles.</strong> Pick a number, say 5, and look at each 3×3 box. If only one square in a box can hold a 5, it must go there.</li>
+        <li><strong>Look at the crowded rows first.</strong> A row with seven numbers filled has only two left, and the column or box usually tells you which goes where.</li>
+        <li><strong>Count what's missing.</strong> For a single square, list the numbers already in its row, column and box. If only one number is left over, that's the answer.</li>
+        <li><strong>Never guess.</strong> Every puzzle here has exactly one solution, so it can always be solved by logic alone.</li>
+      </ol>
+      <p>Sudoku became popular worldwide in the 2000s, but number-placement puzzles are much older. A few minutes a day is good practice for concentration and logical thinking.</p>
+    </section>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var CLUES = { easy: 38, medium: 31, hard: 26 };
+  var level = PLAY.load("sudoku-level", "easy"), puzzle, solution, cells = [], sel = -1, hints = 0, start = 0, done = false, timer;
+
+  // ---- Generator: random full grid, then remove clues while the solution stays unique ----
+  function canPlace(g, i, n) {
+    var r = Math.floor(i / 9), c = i % 9, br = r - r % 3, bc = c - c % 3;
+    for (var k = 0; k < 9; k++) {
+      if (g[r * 9 + k] === n || g[k * 9 + c] === n) return false;
+      if (g[(br + Math.floor(k / 3)) * 9 + bc + k % 3] === n) return false;
+    }
+    return true;
+  }
+  function fill(g) {
+    var i = g.indexOf(0);
+    if (i < 0) return true;
+    var nums = PLAY.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    for (var k = 0; k < 9; k++) {
+      if (canPlace(g, i, nums[k])) { g[i] = nums[k]; if (fill(g)) return true; g[i] = 0; }
+    }
+    return false;
+  }
+  function countSolutions(g, limit) {
+    // pick the empty cell with the fewest candidates (fast enough for hard grids)
+    var bestI = -1, bestC = null;
+    for (var i = 0; i < 81; i++) {
+      if (g[i]) continue;
+      var c = [];
+      for (var n = 1; n <= 9; n++) if (canPlace(g, i, n)) c.push(n);
+      if (!c.length) return 0;
+      if (!bestC || c.length < bestC.length) { bestI = i; bestC = c; if (c.length === 1) break; }
+    }
+    if (bestI < 0) return 1;
+    var total = 0;
+    for (var k = 0; k < bestC.length && total < limit; k++) {
+      g[bestI] = bestC[k]; total += countSolutions(g, limit - total); g[bestI] = 0;
+    }
+    return total;
+  }
+  function generate(clues) {
+    var full = new Array(81).fill(0); fill(full);
+    var g = full.slice(), filled = 81;
+    var order = PLAY.shuffle(Array.from({ length: 81 }, function (_, i) { return i; }));
+    for (var k = 0; k < order.length && filled > clues; k++) {
+      var i = order[k], keep = g[i];
+      g[i] = 0;
+      if (countSolutions(g.slice(), 2) !== 1) g[i] = keep; else filled--;
+    }
+    return { puzzle: g, solution: full };
+  }
+
+  // ---- UI ----
+  function newGame() {
+    var p = generate(CLUES[level]);
+    puzzle = p.puzzle.slice(); solution = p.solution; cells = p.puzzle.slice();
+    hints = 0; sel = cells.indexOf(0); done = false; start = Date.now();
+    document.querySelectorAll("[data-level]").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.level === level); });
+    var best = PLAY.getBest("sudoku-" + level);
+    $("s-best").textContent = best === null ? "–" : fmt(best);
+    $("feedback").innerHTML = "";
+    render();
+  }
+  function fmt(s) { return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+  function conflicts() {
+    var bad = new Set();
+    for (var i = 0; i < 81; i++) {
+      if (!cells[i]) continue;
+      var v = cells[i]; cells[i] = 0;
+      if (!canPlace(cells, i, v)) bad.add(i);
+      cells[i] = v;
+    }
+    return bad;
+  }
+  function render() {
+    var bad = conflicts(), sr = Math.floor(sel / 9), sc = sel % 9;
+    $("grid").innerHTML = "";
+    cells.forEach(function (v, i) {
+      var b = document.createElement("button"), r = Math.floor(i / 9), c = i % 9;
+      b.textContent = v || "";
+      b.setAttribute("aria-label", "Row " + (r + 1) + " column " + (c + 1) + (v ? ", " + v : ", empty"));
+      if (puzzle[i]) b.classList.add("given");
+      if (sel >= 0 && (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3)))) b.classList.add("peer");
+      if (sel >= 0 && v && v === cells[sel]) b.classList.add("same");
+      if (i === sel) b.classList.add("sel");
+      if (bad.has(i)) b.classList.add("conflict");
+      b.onclick = function () { sel = i; render(); };
+      $("grid").appendChild(b);
+    });
+    $("s-hints").textContent = hints;
+  }
+  function put(n) {
+    if (done || sel < 0 || puzzle[sel]) return;
+    cells[sel] = n; render(); check();
+  }
+  function check() {
+    if (cells.indexOf(0) >= 0 || conflicts().size) return;
+    done = true;
+    var secs = Math.round((Date.now() - start) / 1000);
+    var isBest = hints === 0 && PLAY.best("sudoku-" + level, secs, true);
+    if (isBest) $("s-best").textContent = fmt(secs);
+    $("feedback").innerHTML = '<div class="feedback good"><strong>Solved in ' + fmt(secs) + "!</strong> " + (hints ? "You used " + hints + " hint" + (hints > 1 ? "s" : "") + ". Solve one without hints to set a best time." : isBest ? "That's a new best time for " + level + "." : "Great logic.") +
+      '<div class="btn-row" style="margin-top:10px"><button class="btn btn-sm" id="again">New puzzle</button><button class="btn btn-sm btn-ghost" id="share">Share</button></div></div>';
+    $("again").onclick = newGame;
+    $("share").onclick = function () { PLAY.share("I solved a " + level + " Sudoku in " + fmt(secs) + " on PHG Labs Play. Your turn!"); };
+  }
+  var pad = $("pad");
+  for (var n = 1; n <= 9; n++) (function (n) { var b = document.createElement("button"); b.textContent = n; b.onclick = function () { put(n); }; pad.appendChild(b); })(n);
+  var erase = document.createElement("button"); erase.textContent = "⌫"; erase.setAttribute("aria-label", "Clear square"); erase.onclick = function () { put(0); }; pad.appendChild(erase);
+  var hint = document.createElement("button"); hint.textContent = "Hint"; hint.style.gridColumn = "span 5"; hint.style.fontSize = "1rem";
+  hint.onclick = function () {
+    if (done) return;
+    if (sel < 0 || puzzle[sel] || cells[sel] === solution[sel]) sel = cells.findIndex(function (v, i) { return v !== solution[i]; });
+    if (sel < 0) return;
+    hints++; cells[sel] = solution[sel]; render(); check();
+  };
+  pad.appendChild(hint);
+  document.addEventListener("keydown", function (e) {
+    if (e.key >= "1" && e.key <= "9") put(+e.key);
+    else if (e.key === "Backspace" || e.key === "Delete" || e.key === "0") put(0);
+    else if (e.key.indexOf("Arrow") === 0 && sel >= 0) {
+      e.preventDefault();
+      var r = Math.floor(sel / 9), c = sel % 9;
+      if (e.key === "ArrowUp") r = (r + 8) % 9; if (e.key === "ArrowDown") r = (r + 1) % 9;
+      if (e.key === "ArrowLeft") c = (c + 8) % 9; if (e.key === "ArrowRight") c = (c + 1) % 9;
+      sel = r * 9 + c; render();
+    }
+  });
+  document.querySelectorAll("[data-level]").forEach(function (b) {
+    b.onclick = function () { level = b.dataset.level; PLAY.save("sudoku-level", level); newGame(); };
+  });
+  timer = setInterval(function () { if (!done && start) $("s-time").textContent = fmt(Math.round((Date.now() - start) / 1000)); }, 500);
+  newGame();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reflex Test: How Fast Is Your Reaction Time? | PHG Labs Play</title>
+  <meta name="description" content="Test your reaction time in milliseconds. Tap as soon as the screen turns green: five tries, then see your average and how it compares. Free, works on phone and computer.">
+  <link rel="canonical" href="https://play.phglabs.in/reflex/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+  <style>
+    .arena { min-height: 340px; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      padding: 24px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background .1s; }
+    .arena h2 { font-size: clamp(1.6rem, 5vw, 2.6rem); margin: 0 0 8px; }
+    .arena p { margin: 0; font-size: 1.1rem; }
+    .arena.idle { background: var(--grad); }
+    .arena.wait { background: #B91C1C; }
+    .arena.go { background: #16A34A; }
+    .arena.result { background: var(--card-2); border: 1px solid var(--line); }
+    .tries { display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+    .tries span { padding: 6px 12px; border-radius: 99px; background: var(--bg-2); border: 1px solid var(--line); font-weight: 700; font-size: .9rem; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Brain test · Speed</span>
+      <h1>Reflex Test ⚡</h1>
+      <p>Wait for green, then tap as fast as you can. We measure your reaction time in milliseconds over five tries.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel">
+        <div class="arena idle" id="arena" role="button" tabindex="0" aria-live="assertive">
+          <h2>Tap to start</h2><p>Then wait for the green screen.</p>
+        </div>
+        <div class="tries" id="tries"></div>
+        <div id="after" class="btn-row hidden" style="justify-content:center;margin-top:14px"><button class="btn btn-ghost" id="share">Share result</button></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Try</small><b id="s-try">0/5</b></div>
+          <div class="stat"><small>Average</small><b id="s-avg">–</b></div>
+          <div class="stat"><small>Best avg</small><b id="s-best">–</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+        <div class="panel howto">
+          <h2>How to play</h2>
+          <ul>
+            <li>Tap the box (or press Space) to start.</li>
+            <li>It turns <strong style="color:#F87171">red</strong>: wait…</li>
+            <li>When it turns <strong style="color:#4ADE80">green</strong>, tap as fast as you can.</li>
+            <li>Tapping too early doesn't count, so you'll redo that try.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>What is a good reaction time?</h2>
+      <p>For a visual signal like this one, most people react in roughly <strong>200 to 300 milliseconds</strong>. Under 200 ms is very quick, and well-trained gamers and athletes often reach that. On a phone, add a little extra time for the touch screen itself.</p>
+      <p>Your result changes with how alert you are. Sleep, caffeine, warming up and even the device you use all make a difference. Try it in the morning and again at night, and compare.</p>
+      <h2>Can you improve your reflexes?</h2>
+      <p>Yes, up to a point. Practice makes your response more consistent, and sports, music and action games all train quick reactions. Good sleep matters most: tiredness slows you down more than anything else.</p>
+    </section>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var TRIES = 5, state = "idle", times = [], goAt = 0, waitT;
+  function set(cls, h, p) { var a = $("arena"); a.className = "arena " + cls; a.innerHTML = "<h2>" + h + "</h2><p>" + p + "</p>"; }
+  function stats() {
+    $("s-try").textContent = times.length + "/" + TRIES;
+    $("s-avg").textContent = times.length ? Math.round(times.reduce(function (a, b) { return a + b; }) / times.length) : "–";
+    var b = PLAY.getBest("reflex"); $("s-best").textContent = b === null ? "–" : b;
+    $("tries").innerHTML = times.map(function (t, i) { return "<span>#" + (i + 1) + ": " + t + " ms</span>"; }).join("");
+  }
+  function wait() {
+    state = "wait"; set("wait", "Wait for green…", "Don't tap yet.");
+    waitT = setTimeout(function () { state = "go"; goAt = performance.now(); set("go", "TAP!", ""); }, 1500 + Math.random() * 3000);
+  }
+  function press(e) {
+    if (e && e.cancelable) e.preventDefault();
+    if (state === "idle" || state === "result") { if (state === "result") times = []; $("after").classList.add("hidden"); stats(); wait(); }
+    else if (state === "wait") { clearTimeout(waitT); state = "early"; set("wait", "Too early!", "Tap to try again."); }
+    else if (state === "early") wait();
+    else if (state === "go") {
+      var t = Math.round(performance.now() - goAt);
+      times.push(t); stats();
+      if (times.length < TRIES) { state = "between"; set("idle", t + " ms", "Tap to keep going."); }
+      else {
+        var avg = Math.round(times.reduce(function (a, b) { return a + b; }) / TRIES);
+        var isBest = PLAY.best("reflex", avg, true);
+        var verdict = avg < 200 ? "Lightning fast! ⚡" : avg < 250 ? "Very quick!" : avg < 320 ? "Nice, that's a typical human reaction time." : "Warm up and try again!";
+        state = "result"; set("result", "Average: " + avg + " ms", verdict + (isBest ? " New personal best!" : "") + "<br><small class='muted'>Tap to play again.</small>");
+        $("after").classList.remove("hidden");
+        $("share").onclick = function () { PLAY.share("My reaction time is " + avg + " ms on the PHG Labs Reflex Test ⚡ How fast are you?"); };
+        stats();
+      }
+    }
+    else if (state === "between") wait();
+  }
+  $("arena").addEventListener("pointerdown", press);
+  document.addEventListener("keydown", function (e) { if (e.code === "Space" || e.key === "Enter") { e.preventDefault(); press(); } });
+  stats();
+});
+</script>
+</body>
+</html>

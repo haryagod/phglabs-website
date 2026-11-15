@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Play Chess Against the Computer Free: 5 Levels | PHG Labs Play</title>
+  <meta name="description" content="Play chess against the computer online for free. Choose from five levels, from beginner to strong (powered by the Stockfish engine), play as White or Black, and take back moves.">
+  <link rel="canonical" href="https://play.phglabs.in/chess/play/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/chess.css">
+  <script src="/js/core.js" defer></script>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Chess · vs computer</span>
+      <h1>Play the Computer 🤖</h1>
+      <p>A full game of chess against the Stockfish engine. Start at level 1 and work your way up. Your game is saved, so you can come back to it later.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel">
+        <div class="turn" id="turn"></div>
+        <div class="board-wrap"><div class="board-el" id="board"></div></div>
+      </div>
+      <aside class="side">
+        <div class="panel">
+          <h3>Computer level</h3>
+          <div class="seg" id="levels" role="group" aria-label="Computer level"></div>
+          <h3 style="margin-top:16px">You play</h3>
+          <div class="seg" id="colors" role="group" aria-label="Your colour">
+            <button data-color="w">White</button><button data-color="b">Black</button><button data-color="r">Random</button>
+          </div>
+          <div class="btn-row" style="margin-top:16px">
+            <button class="btn btn-sm" id="new">New game</button>
+            <button class="btn btn-sm btn-ghost" id="undo">↶ Take back</button>
+            <button class="btn btn-sm btn-ghost" id="flip">⇅ Flip</button>
+          </div>
+        </div>
+        <div class="panel status"><div id="status" aria-live="polite">Loading engine…</div></div>
+        <div class="panel"><h3>Moves</h3><div class="moves" id="moves">–</div></div>
+        <div class="stats">
+          <div class="stat"><small>Won</small><b id="s-w">0</b></div>
+          <div class="stat"><small>Drawn</small><b id="s-d">0</b></div>
+          <div class="stat"><small>Lost</small><b id="s-l">0</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>Choosing a level</h2>
+      <ul>
+        <li><strong>Level 1, Beginner:</strong> makes plenty of mistakes. Good if you've just learned the moves.</li>
+        <li><strong>Level 2, Casual:</strong> knows the basics but often misses tactics.</li>
+        <li><strong>Level 3, Club:</strong> a solid opponent that punishes loose pieces.</li>
+        <li><strong>Level 4, Strong:</strong> calculates several moves ahead. Most players lose here.</li>
+        <li><strong>Level 5, Master:</strong> full strength, thinking about a second per move.</li>
+      </ul>
+      <p>Lost a game? Use <strong>Take back</strong> to try a different move, which is a great way to learn. Your wins, draws and losses are saved on your device.</p>
+      <p class="muted">Engine: <a href="https://stockfishchess.org/" rel="noopener">Stockfish 19</a>, compiled for the browser by <a href="https://github.com/nmrugg/stockfish.js" rel="noopener">stockfish.js</a>. It is free software under the GNU GPL v3 (<a href="/vendor/stockfish/Copying.txt">licence</a>, <a href="https://github.com/nmrugg/stockfish.js" rel="noopener">source code</a>). It runs entirely in your browser.</p>
+    </section>
+  </div>
+</main>
+<script type="module">
+  import { createBoard, enableInput, markLastMove, tryMove, Chess, COLOR } from "/js/chess-ui.js";
+  const $ = (id) => document.getElementById(id);
+  const LEVELS = [
+    { name: "1", skill: 0, go: "depth 1" },
+    { name: "2", skill: 3, go: "depth 2" },
+    { name: "3", skill: 8, go: "depth 5" },
+    { name: "4", skill: 14, go: "depth 9" },
+    { name: "5", skill: 20, go: "movetime 1200" },
+  ];
+  const saved = PLAY.load("vs-game", null);
+  let level = PLAY.load("vs-level", 0), colorPref = PLAY.load("vs-color", "w");
+  let player = saved ? saved.player : "w", game = new Chess(), thinking = false, over = false, ready = false;
+  if (saved) { try { game.loadPgn(saved.pgn); } catch (e) { game = new Chess(); } }
+  const board = createBoard($("board"), game.fen(), player);
+
+  // ---- Engine (Web Worker) ----
+  const engine = new Worker("/vendor/stockfish/stockfish-19-lite-single.js");
+  let onBest = null;
+  engine.onmessage = (e) => {
+    const line = typeof e.data === "string" ? e.data : "";
+    if (line === "readyok" && !ready) { ready = true; applyLevel(); start(); }
+    const m = /^bestmove (\S+)/.exec(line);
+    if (m && onBest) { const cb = onBest; onBest = null; cb(m[1]); }
+  };
+  engine.onerror = () => { $("status").innerHTML = "<strong>The chess engine couldn't start in this browser.</strong> Try an up-to-date Chrome, Edge, Firefox or Safari."; };
+  engine.postMessage("uci");
+  engine.postMessage("isready");
+  function applyLevel() { engine.postMessage("setoption name Skill Level value " + LEVELS[level].skill); }
+
+  // ---- UI ----
+  function buttons() {
+    $("levels").innerHTML = LEVELS.map((l, i) => `<button data-level="${i}" aria-pressed="${i === level}">${l.name}</button>`).join("");
+    document.querySelectorAll("[data-level]").forEach((b) => (b.onclick = () => { level = +b.dataset.level; PLAY.save("vs-level", level); applyLevel(); buttons(); }));
+    document.querySelectorAll("[data-color]").forEach((b) => { b.setAttribute("aria-pressed", b.dataset.color === colorPref); b.onclick = () => { colorPref = b.dataset.color; PLAY.save("vs-color", colorPref); buttons(); }; });
+  }
+  function record() {
+    const r = PLAY.load("vs-record", { w: 0, d: 0, l: 0 });
+    $("s-w").textContent = r.w; $("s-d").textContent = r.d; $("s-l").textContent = r.l;
+    return r;
+  }
+  function persist() { PLAY.save("vs-game", over ? null : { pgn: game.pgn(), player }); }
+  function movesList() {
+    const h = game.history();
+    $("moves").innerHTML = h.length ? h.reduce((s, m, i) => s + (i % 2 === 0 ? `<b>${i / 2 + 1}.</b>` : "") + m + " ", "") : "–";
+    $("moves").scrollTop = 1e6;
+  }
+  function status() {
+    const turn = game.turn();
+    $("turn").innerHTML = `<i class="${turn}"></i> ${turn === player ? "Your move" : "Computer is thinking…"}`;
+    movesList();
+    if (!game.isGameOver()) {
+      $("status").innerHTML = game.inCheck() ? (turn === player ? "<strong>You're in check!</strong>" : "<strong>Check!</strong>") : `You play <strong>${player === "w" ? "White" : "Black"}</strong> · Level ${LEVELS[level].name}`;
+      return;
+    }
+    over = true;
+    const r = record();
+    let msg;
+    if (game.isCheckmate()) {
+      const won = turn !== player;
+      won ? r.w++ : r.l++;
+      msg = won ? "🏆 <strong>Checkmate, you win!</strong> Try the next level?" : "<strong>Checkmate.</strong> The computer wins this time. Take back a move or try again.";
+    } else {
+      r.d++;
+      msg = "<strong>Draw</strong>: " + (game.isStalemate() ? "stalemate." : game.isThreefoldRepetition() ? "the same position three times." : game.isInsufficientMaterial() ? "not enough pieces left to checkmate." : "50 moves without a capture or pawn move.");
+    }
+    PLAY.save("vs-record", r); record();
+    $("status").innerHTML = msg;
+    $("turn").innerHTML = "Game over";
+    persist();
+  }
+  function computerMove() {
+    if (over || game.turn() === player) return;
+    thinking = true;
+    board.disableMoveInput();
+    status();
+    engine.postMessage("position fen " + game.fen());
+    engine.postMessage("go " + LEVELS[level].go);
+    onBest = (uci) => {
+      thinking = false;
+      const m = tryMove(game, uci.slice(0, 2), uci.slice(2, 4), uci[4]);
+      if (!m) return;
+      board.setPosition(game.fen(), true);
+      markLastMove(board, m.from, m.to);
+      persist(); status();
+      if (!over) enableInput(board, game, player, playerMove);
+    };
+  }
+  function playerMove(from, to, promo) {
+    if (thinking || over) return;
+    const m = tryMove(game, from, to, promo);
+    if (!m) { board.setPosition(game.fen(), true); return; }
+    board.setPosition(game.fen(), true);
+    markLastMove(board, m.from, m.to);
+    persist(); status();
+    setTimeout(computerMove, 250);
+  }
+  function start() {
+    over = false;
+    board.setOrientation(player === "w" ? COLOR.white : COLOR.black);
+    board.setPosition(game.fen(), false);
+    const last = game.history({ verbose: true }).pop();
+    markLastMove(board, last && last.from, last && last.to);
+    status();
+    if (over) return;
+    if (game.turn() === player) enableInput(board, game, player, playerMove);
+    else computerMove();
+  }
+  $("new").onclick = () => {
+    if (thinking) { engine.postMessage("stop"); onBest = null; thinking = false; }
+    game = new Chess();
+    player = colorPref === "r" ? (Math.random() < 0.5 ? "w" : "b") : colorPref;
+    engine.postMessage("ucinewgame");
+    PLAY.save("vs-game", null);
+    board.disableMoveInput();
+    start();
+  };
+  $("undo").onclick = () => {
+    if (thinking || game.history().length === 0) return;
+    game.undo();
+    if (game.turn() !== player && game.history().length) game.undo();
+    if (game.turn() !== player) { start(); return; } // player is Black and we're back at the start
+    over = false; persist();
+    board.disableMoveInput(); start();
+  };
+  $("flip").onclick = () => board.setOrientation(board.getOrientation() === COLOR.white ? COLOR.black : COLOR.white, true);
+  buttons(); record();
+</script>
+</body>
+</html>

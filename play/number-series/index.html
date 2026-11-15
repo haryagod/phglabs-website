@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Number Series: Aptitude Practice with Answers | PHG Labs Play</title>
+  <meta name="description" content="Find the next number in the series. Free number series practice for aptitude tests, campus placements and bank exams, with the rule explained after every question.">
+  <link rel="canonical" href="https://play.phglabs.in/number-series/">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/play.css">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
+  <script src="/js/core.js" defer></script>
+  <style>
+    .series { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 22px 0; }
+    .series span { min-width: 64px; padding: 14px 12px; text-align: center; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--line); font: 800 1.6rem Inter, sans-serif; color: #fff; }
+    .series span.q { background: var(--grad); }
+    .answer { display: flex; gap: 10px; justify-content: center; }
+    .answer input { width: 160px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg-2); color: #fff; font: 700 1.3rem Inter, sans-serif; text-align: center; }
+    .answer input:focus { outline: 2px solid var(--cyan); }
+    .timer { height: 6px; border-radius: 99px; background: var(--bg-2); overflow: hidden; margin-top: 16px; }
+    .timer i { display: block; height: 100%; background: var(--amber); width: 100%; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="container">
+    <div class="game-head">
+      <span class="eyebrow">Puzzle · Aptitude</span>
+      <h1>Number Series</h1>
+      <p>Spot the pattern and type the next number. Ten questions per round, and they get harder as you go. Faster answers earn bonus points.</p>
+    </div>
+    <div class="game-layout">
+      <div class="panel" id="game">
+        <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+        <h2 style="margin:16px 0 0" id="title">Question 1</h2>
+        <div class="series" id="series" aria-live="polite"></div>
+        <form class="answer" id="form" autocomplete="off">
+          <input id="input" inputmode="numeric" pattern="-?[0-9]*" aria-label="Next number" placeholder="?" required>
+          <button class="btn" type="submit">Check</button>
+        </form>
+        <div class="timer" aria-hidden="true"><i id="time"></i></div>
+        <div id="feedback"></div>
+        <div class="btn-row" style="margin-top:14px;justify-content:center"><button class="btn hidden" id="next">Next →</button></div>
+      </div>
+      <aside class="side">
+        <div class="stats">
+          <div class="stat"><small>Question</small><b id="s-q">1/10</b></div>
+          <div class="stat"><small>Points</small><b id="s-score">0</b></div>
+          <div class="stat"><small>Best</small><b id="s-best">–</b></div>
+        </div>
+        <div class="ad" data-slot="side"></div>
+        <div class="panel howto">
+          <h2>How to play</h2>
+          <ul>
+            <li>Type the number that comes next and press <strong>Check</strong>.</li>
+            <li>A correct answer is worth 10 points, plus up to 10 bonus points for speed (30 seconds per question).</li>
+            <li>After each question you see the rule, right or wrong.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+    <section class="section card prose">
+      <h2>How to solve number series questions</h2>
+      <p>Number series appear in almost every aptitude test: campus placements, bank exams (IBPS, SBI), SSC and company hiring tests. Most series follow one of a few patterns. Try these checks in order:</p>
+      <ol>
+        <li><strong>Differences:</strong> subtract each number from the next. Equal differences mean you add the same amount every time (2, 5, 8, 11: add 3).</li>
+        <li><strong>Differences of differences:</strong> if the gaps themselves grow steadily (1, 3, 6, 10: gaps 2, 3, 4), the next gap continues that pattern.</li>
+        <li><strong>Ratios:</strong> if the numbers grow fast, divide each by the one before. Equal ratios mean you multiply (3, 6, 12, 24: times 2).</li>
+        <li><strong>Squares and cubes:</strong> learn 1², 2² … 20² and 1³ … 10³ by heart, because they show up often, sometimes with +1 or −1.</li>
+        <li><strong>Two series in one:</strong> if nothing fits, look at every second number. Many series alternate between two separate patterns.</li>
+        <li><strong>Previous two numbers:</strong> each term might be the sum of the two before it, as in the Fibonacci series.</li>
+      </ol>
+    </section>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var R = function (a, b) { return a + Math.floor(Math.random() * (b - a + 1)); };
+  var N = 10, LIMIT = 30, q = 0, score = 0, cur, deadline, tick, answered;
+  var isPrime = function (n) { if (n < 2) return false; for (var d = 2; d * d <= n; d++) if (n % d === 0) return false; return true; };
+
+  // Each generator returns { seq: [...shown terms, answer], rule }. Tiers unlock as the round goes on.
+  var GEN = [
+    [ // easy
+      function () { var a = R(1, 20), d = R(2, 9); return { seq: [0, 1, 2, 3, 4, 5].map(function (k) { return a + k * d; }), rule: "Add " + d + " each time." }; },
+      function () { var a = R(60, 120), d = R(3, 9); return { seq: [0, 1, 2, 3, 4, 5].map(function (k) { return a - k * d; }), rule: "Subtract " + d + " each time." }; },
+      function () { var a = R(1, 5), r = R(2, 3); return { seq: [0, 1, 2, 3, 4].map(function (k) { return a * Math.pow(r, k); }), rule: "Multiply by " + r + " each time." }; }
+    ],
+    [ // medium
+      function () { var a = R(1, 10), d = R(1, 4), s = R(1, 3), seq = [a]; for (var k = 0; k < 5; k++) seq.push(seq[k] + d + k * s); return { seq: seq, rule: "The gap grows by " + s + " each time (+" + d + ", +" + (d + s) + ", +" + (d + 2 * s) + " …)." }; },
+      function () { var k0 = R(1, 8), o = R(-1, 1); return { seq: [0, 1, 2, 3, 4, 5].map(function (k) { return (k0 + k) * (k0 + k) + o; }), rule: "Square numbers" + (o ? " " + (o > 0 ? "plus" : "minus") + " 1" : "") + ": " + k0 + "², " + (k0 + 1) + "², " + (k0 + 2) + "² …" }; },
+      function () { var a = R(1, 5), b = R(2, 6), seq = [a, b]; for (var k = 0; k < 5; k++) seq.push(seq[k] + seq[k + 1]); return { seq: seq, rule: "Each number is the sum of the two before it." }; },
+      function () { var p = [], n = R(2, 30); while (p.length < 6) { if (isPrime(n)) p.push(n); n++; } return { seq: p, rule: "Prime numbers in order (numbers divisible only by 1 and themselves)." }; }
+    ],
+    [ // hard
+      function () { var a = R(2, 6), x = R(2, 5), m = 2, seq = [a]; for (var k = 0; k < 6; k++) seq.push(k % 2 === 0 ? seq[k] + x : seq[k] * m); return { seq: seq, rule: "Alternately add " + x + " and multiply by " + m + "." }; },
+      function () { var a = R(1, 9), d1 = R(2, 5), b = R(20, 40), d2 = R(2, 5), seq = []; for (var k = 0; k < 4; k++) { seq.push(a + k * d1); seq.push(b - k * d2); } return { seq: seq.slice(0, 7), rule: "Two series take turns: one adds " + d1 + " (" + a + ", " + (a + d1) + " …), the other subtracts " + d2 + " (" + b + ", " + (b - d2) + " …)." }; },
+      function () { var k0 = R(1, 4); return { seq: [0, 1, 2, 3, 4].map(function (k) { return Math.pow(k0 + k, 3); }), rule: "Cube numbers: " + k0 + "³, " + (k0 + 1) + "³, " + (k0 + 2) + "³ …" }; },
+      function () { var a = R(1, 4), seq = [a]; for (var k = 1; k < 6; k++) seq.push(seq[k - 1] * 2 + 1); return { seq: seq, rule: "Double the number, then add 1." }; },
+      function () { var k0 = R(1, 6); return { seq: [0, 1, 2, 3, 4, 5].map(function (k) { return (k0 + k) * (k0 + k + 1); }), rule: "n × (n + 1): " + k0 + "×" + (k0 + 1) + ", " + (k0 + 1) + "×" + (k0 + 2) + " …" }; }
+    ]
+  ];
+
+  function stats() {
+    $("s-q").textContent = Math.min(q + 1, N) + "/" + N;
+    $("s-score").textContent = score;
+    var b = PLAY.getBest("number-series"); $("s-best").textContent = b === null ? "–" : b;
+    if ($("bar")) $("bar").style.width = (q / N * 100) + "%";
+  }
+  function question() {
+    var tier = q < 3 ? 0 : q < 7 ? 1 : 2, pool = GEN[tier];
+    cur = pool[R(0, pool.length - 1)]();
+    var shown = cur.seq.slice(0, -1);
+    $("title").textContent = "Question " + (q + 1);
+    $("series").innerHTML = shown.map(function (n) { return "<span>" + n + "</span>"; }).join("") + '<span class="q">?</span>';
+    $("feedback").innerHTML = ""; $("next").classList.add("hidden");
+    $("input").value = ""; $("input").disabled = false; $("input").focus();
+    answered = false; deadline = Date.now() + LIMIT * 1000;
+    clearInterval(tick);
+    tick = setInterval(function () {
+      var left = Math.max(0, deadline - Date.now());
+      $("time").style.width = (left / LIMIT / 10) + "%";
+      if (!left) answer(null);
+    }, 100);
+    stats();
+  }
+  function answer(v) {
+    if (answered) return;
+    answered = true; clearInterval(tick);
+    var right = cur.seq[cur.seq.length - 1], ok = v === right;
+    var bonus = ok ? Math.round(Math.max(0, deadline - Date.now()) / (LIMIT * 1000) * 10) : 0;
+    if (ok) score += 10 + bonus;
+    $("series").lastChild.textContent = right;
+    $("input").disabled = true;
+    $("feedback").innerHTML = '<div class="feedback ' + (ok ? "good" : "bad") + '"><strong>' +
+      (ok ? "Correct! +" + (10 + bonus) : v === null ? "Time's up. The answer is " + right + "." : "Not quite. The answer is " + right + ".") + "</strong> " + cur.rule + "</div>";
+    $("next").textContent = q === N - 1 ? "See my result →" : "Next →";
+    $("next").classList.remove("hidden"); $("next").focus();
+    stats();
+  }
+  function finish() {
+    var isBest = PLAY.best("number-series", score);
+    $("bar").style.width = "100%";
+    $("game").innerHTML = "<h2>Round complete: " + score + " points</h2><p>" + (score >= 160 ? "Outstanding! You're ready for any aptitude test." : score >= 100 ? "Good work! Keep practising the harder patterns." : "Keep going. Read the tips below, and the patterns will start to click.") + "</p>" +
+      (isBest ? '<p class="grad"><strong>New personal best!</strong></p>' : "") +
+      '<div class="btn-row"><button class="btn" id="again">Play again</button><button class="btn btn-ghost" id="share">Share score</button></div>';
+    $("again").onclick = function () { location.reload(); };
+    $("share").onclick = function () { PLAY.share("I scored " + score + " points on Number Series, aptitude practice on PHG Labs Play. Can you beat it?"); };
+    stats();
+  }
+  $("form").onsubmit = function (e) {
+    e.preventDefault();
+    var raw = $("input").value.trim();
+    if (!/^-?\d+$/.test(raw)) { PLAY.toast("Type a whole number"); return; }
+    answer(parseInt(raw, 10));
+  };
+  $("next").onclick = function () { q++; if (q < N) question(); else finish(); };
+  question();
+});
+</script>
+</body>
+</html>
