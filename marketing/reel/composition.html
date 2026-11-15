@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PHG Labs Reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #0B1026; --indigo: #4F46E5; --cyan: #06B6D4; --grad: linear-gradient(135deg, #6D63FF 0%, #22D3EE 100%); --grad-text: linear-gradient(100deg, #A5A0FF 0%, #67E8F9 70%); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); font-family: Inter, sans-serif; color: #fff; }
+  .abs { position: absolute; }
+  .full { position: absolute; inset: 0; }
+  .bg { position: absolute; inset: 0; overflow: hidden; opacity: 0; }
+  .bg img { position: absolute; left: 50%; top: 50%; width: 1296px; height: 2304px; margin: -1152px 0 0 -648px; }
+  .shade { background: linear-gradient(180deg, rgba(11,16,38,.82) 0%, rgba(11,16,38,.35) 30%, rgba(11,16,38,.30) 52%, rgba(11,16,38,.80) 78%, rgba(11,16,38,.95) 100%); }
+  .vignette { background: radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.6) 100%); }
+  .flash { background: var(--grad); mix-blend-mode: screen; opacity: 0; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  [data-pop] { opacity: 0; will-change: transform, opacity; }
+
+  .brand { left: 64px; top: 200px; display: flex; align-items: center; gap: 16px; font-size: 38px; font-weight: 600; letter-spacing: -.5px; }
+  .brand b { font-weight: 900; }
+  .brand svg { width: 58px; height: 58px; filter: drop-shadow(0 6px 18px rgba(34,211,238,.45)); }
+
+  .h1 { font-weight: 900; letter-spacing: -4px; line-height: .98; text-shadow: 0 10px 40px rgba(0,0,0,.55); }
+  .grad { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 30px rgba(34,211,238,.35)); }
+  .eyebrow { font-size: 30px; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; color: #67E8F9; }
+  .line { display: block; }
+  .w { display: inline-block; }
+
+  .chip { display: flex; align-items: center; gap: 22px; padding: 24px 30px; border-radius: 26px; font-size: 38px; font-weight: 700; letter-spacing: -.5px;
+          background: rgba(15, 23, 52, .62); border: 2px solid rgba(255,255,255,.14); backdrop-filter: blur(14px); box-shadow: 0 20px 50px -20px rgba(0,0,0,.6); }
+  .chip i { flex: none; width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 30px; font-weight: 900; }
+  .chip.bad i { background: #EF4444; }
+  .chip.good i { background: var(--grad); }
+  .chip small { display: block; font-size: 26px; font-weight: 500; color: #CBD5E1; margin-top: 2px; letter-spacing: 0; }
+
+  .phone { left: 590px; top: 600px; width: 440px; height: 900px; border-radius: 64px; background: #05070F; padding: 14px;
+           box-shadow: 0 0 0 3px #2A3150, 0 50px 120px -30px rgba(0,0,0,.9), 0 0 90px -10px rgba(79,70,229,.6); opacity: 0; }
+  .phone .screen { position: relative; width: 100%; height: 100%; border-radius: 52px; overflow: hidden; background: #fff; }
+  .phone .screen img { position: absolute; left: 0; top: 0; width: 412px; }
+  .phone .notch { position: absolute; left: 50%; top: 26px; width: 120px; height: 34px; margin-left: -60px; background: #05070F; border-radius: 20px; z-index: 2; }
+
+  .tile { width: 440px; height: 250px; border-radius: 34px; padding: 34px; display: flex; flex-direction: column; justify-content: space-between;
+          background: rgba(15, 23, 52, .6); border: 2px solid rgba(255,255,255,.14); backdrop-filter: blur(14px); }
+  .tile .ic { width: 84px; height: 84px; border-radius: 24px; background: var(--grad); display: grid; place-items: center; }
+  .tile .ic svg { width: 46px; height: 46px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tile h3 { font-size: 44px; font-weight: 800; letter-spacing: -1px; }
+
+  .captions { left: 60px; right: 60px; top: 1240px; text-align: center; font-size: 72px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.1;
+              -webkit-text-stroke: 2px rgba(0,0,0,.35); text-shadow: 0 6px 0 rgba(0,0,0,.35), 0 10px 40px rgba(0,0,0,.8); }
+  .captions { z-index: 20; }
+  .captions .box { display: inline-block; padding: 14px 26px 20px; border-radius: 30px; background: rgba(8, 12, 30, .92); border: 2px solid rgba(103,232,249,.25); box-shadow: 0 20px 60px -20px rgba(0,0,0,.8); }
+  .captions span { display: inline-block; margin: 0 10px; }
+  .flash { z-index: 30; }
+  .captions span.on { color: #67E8F9; }
+
+  .pill { left: 50%; top: 1000px; transform: translateX(-50%); padding: 30px 70px; border-radius: 999px; background: var(--grad); font-size: 64px; font-weight: 900;
+          letter-spacing: -1px; box-shadow: 0 25px 70px -15px rgba(34,211,238,.7); overflow: hidden; white-space: nowrap; }
+  .pill .shine { position: absolute; top: 0; bottom: 0; width: 140px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent); }
+  .wa { display: flex; align-items: center; gap: 18px; font-size: 46px; font-weight: 800; }
+  .wa svg { width: 64px; height: 64px; }
+</style>
+</head>
+<body>
+  <div id="bgs"></div>
+  <div class="full shade"></div>
+  <div class="full vignette"></div>
+
+  <div class="abs brand" id="brand">
+    <svg viewBox="0 0 64 64"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs><polygon points="32,3 57.1,17.5 57.1,46.5 32,61 6.9,46.5 6.9,17.5" fill="url(#g1)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"><line x1="21" y1="22" x2="43" y2="24"/><line x1="21" y1="22" x2="27" y2="43"/><line x1="43" y1="24" x2="27" y2="43"/><line x1="43" y1="24" x2="45" y2="42"/></g><g fill="#fff"><circle cx="21" cy="22" r="5"/><circle cx="43" cy="24" r="4.2"/><circle cx="27" cy="43" r="4.6"/><circle cx="45" cy="42" r="3"/></g></svg>
+    <span><b>PHG</b> Labs</span>
+  </div>
+
+  <!-- HOOK -->
+  <div class="scene" data-scene="hook">
+    <div class="abs h1" style="left:64px; top:470px; font-size:170px;">
+      <span class="line"><span class="w" data-pop="0.0">Still</span> <span class="w" data-pop="0.12">on</span></span>
+      <span class="line grad" data-pop="0.3" data-from="scale">paper?</span>
+    </div>
+    <svg class="abs" style="left:60px; top:820px; width:640px; height:70px" viewBox="0 0 640 70">
+      <path id="swoosh" d="M8 48 C 160 18, 380 10, 630 34" fill="none" stroke="#EF4444" stroke-width="16" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+    </svg>
+  </div>
+
+  <!-- PROBLEM -->
+  <div class="scene" data-scene="problem">
+    <div class="abs" style="left:64px; top:430px; display:flex; flex-direction:column; gap:28px;">
+      <div class="chip bad" data-pop="w:records" data-from="left"><i>✕</i>Lost records</div>
+      <div class="chip bad" data-pop="w:stock" data-from="left"><i>✕</i>Missing stock</div>
+      <div class="chip bad" data-pop="w:bills" data-from="left"><i>✕</i>Late bills</div>
+    </div>
+    <div class="abs h1" style="left:64px; top:900px; font-size:150px;" data-pop="w:adds" data-from="stamp">It adds <span class="grad">up.</span></div>
+  </div>
+
+  <!-- AYUROS -->
+  <div class="scene" data-scene="ayuros">
+    <div class="abs eyebrow" style="left:64px; top:330px;" data-pop="0.05">For Ayurvedic clinics</div>
+    <div class="abs h1 grad" style="left:60px; top:380px; font-size:160px;" data-pop="0.15" data-from="scale">AyurOS</div>
+    <div class="abs" style="left:64px; top:640px; width:500px; display:flex; flex-direction:column; gap:22px;">
+      <div class="chip good" data-pop="w:patients" data-from="left"><i>✓</i>Patient records</div>
+      <div class="chip good" data-pop="w:prescriptions" data-from="left"><i>✓</i>Prescriptions</div>
+      <div class="chip good" data-pop="w:panchakarma" data-from="left"><i>✓</i>Panchakarma</div>
+      <div class="chip good" data-pop="w:place" data-from="left"><i>✓</i>Stock &amp; billing</div>
+    </div>
+  </div>
+
+  <!-- SHOP STOCK -->
+  <div class="scene" data-scene="shopstock">
+    <div class="abs eyebrow" style="left:64px; top:330px;" data-pop="0.05">For shops &amp; retail</div>
+    <div class="abs h1 grad" style="left:60px; top:380px; font-size:150px;" data-pop="0.15" data-from="scale">Shop Stock</div>
+    <div class="abs" style="left:64px; top:640px; width:510px; display:flex; flex-direction:column; gap:22px;">
+      <div class="chip good" data-pop="w:tracks" data-from="left"><i>📦</i><div>Every item tracked<small>248 items · live</small></div></div>
+      <div class="chip bad" data-pop="w:warns" data-from="left"><i>!</i><div>Low stock alert<small>Basmati rice · 3 left</small></div></div>
+      <div class="chip good" data-pop="w:bills" data-from="left"><i>✓</i><div>Bill ready<small>₹1,250 · in 2 seconds</small></div></div>
+    </div>
+  </div>
+
+  <!-- CUSTOM -->
+  <div class="scene" data-scene="custom">
+    <div class="abs h1" style="left:64px; top:330px; font-size:150px;">
+      <span class="w" data-pop="0.0">Built</span> <span class="w" data-pop="0.12">for</span> <span class="w grad" data-pop="0.24">you.</span>
+    </div>
+    <div class="abs" style="left:64px; top:600px; display:grid; grid-template-columns:440px 440px; gap:24px;">
+      <div class="tile" data-pop="w:custom"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 9h20"/></svg></div><h3>Web apps</h3></div>
+      <div class="tile" data-pop="w:mobile"><div class="ic"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg></div><h3>Mobile apps</h3></div>
+      <div class="tile" data-pop="w:apps"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 18a5 5 0 01-.6-9.96A7 7 0 0119.5 9 4.5 4.5 0 0118 18z"/></svg></div><h3>Cloud</h3></div>
+      <div class="tile" data-pop="w:around"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4z"/><path d="M19 17l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg></div><h3>AI &amp; automation</h3></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="scene" data-scene="cta">
+    <svg class="abs" style="left:400px; top:330px; width:280px; height:280px;" viewBox="0 0 64 64" data-pop="0.05" data-from="logo" id="biglogo">
+      <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+      <polygon points="32,3 57.1,17.5 57.1,46.5 32,61 6.9,46.5 6.9,17.5" fill="url(#g2)"/>
+      <g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"><line x1="21" y1="22" x2="43" y2="24"/><line x1="21" y1="22" x2="27" y2="43"/><line x1="43" y1="24" x2="27" y2="43"/><line x1="43" y1="24" x2="45" y2="42"/></g>
+      <g fill="#fff"><circle cx="21" cy="22" r="5"/><circle cx="43" cy="24" r="4.2"/><circle cx="27" cy="43" r="4.6"/><circle cx="45" cy="42" r="3"/></g>
+    </svg>
+    <div class="abs" style="left:0; right:0; top:640px; text-align:center; font-size:96px; font-weight:600; letter-spacing:-3px;" data-pop="w:labs"><b style="font-weight:900">PHG</b> Labs</div>
+    <div class="abs h1" style="left:0; right:0; top:800px; text-align:center; font-size:110px; letter-spacing:-3px;" data-pop="w:book">Book a <span class="grad">free demo</span></div>
+    <div class="abs pill" data-pop="w:phglabs.in" data-from="scale"><span>phglabs.in</span><i class="shine abs" id="shine"></i></div>
+    <div class="abs" style="left:0; right:0; top:1190px; display:flex; justify-content:center;" data-pop="w:phglabs.in+0.5">
+      <div class="wa"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="12" fill="#25D366"/><path fill="#fff" transform="translate(4 4) scale(.66)" d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 01-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.7 11.8 11.8 0 004.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 001.8-1.2 2.2 2.2 0 00.1-1.2c0-.2-.2-.2-.4-.3z"/></svg>+91 74997 03345</div>
+    </div>
+    <div class="abs" style="left:0; right:0; top:1310px; text-align:center; font-size:34px; font-weight:600; color:#CBD5E1; letter-spacing:1px;" data-pop="w:phglabs.in+0.9">AyurOS · Shop Stock · Custom Software</div>
+  </div>
+
+  <!-- Phone (spans AyurOS -> Shop Stock) -->
+  <div class="abs phone" id="phone"><div class="screen"><div class="notch"></div><img id="site" src="site-full.png"></div></div>
+
+  <div class="abs captions" id="captions"></div>
+  <div class="full flash" id="flash"></div>
+
+<script>
+  const TL = window.TL;            // injected by the renderer
+  const OFF = window.SITE_OFFSETS; // CSS-px offsets of the site's sections
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const prog = (t, a, b) => clamp((t - a) / (b - a));
+  const outCubic = (p) => 1 - Math.pow(1 - p, 3);
+  const inOutCubic = (p) => (p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+  const outBack = (p) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+  const norm = (w) => w.toLowerCase().replace(/[^a-z0-9.]/g, '').replace(/\.$/, '');
+
+  // Background layers
+  const bgs = document.getElementById('bgs');
+  const pan = { hook: [0, -30, 30, 0], problem: [20, 0, -20, 0], ayuros: [-30, 0, 30, -20], shopstock: [0, 40, 0, -40], custom: [30, 0, -30, 0], cta: [0, 0, 0, 0] };
+  TL.scenes.forEach((s) => { const d = document.createElement('div'); d.className = 'bg'; d.innerHTML = `<img src="${s.img}">`; s.bg = d; bgs.appendChild(d); });
+  TL.scenes.forEach((s) => { s.el = document.querySelector(`[data-scene="${s.id}"]`); });
+
+  // Word time lookup per scene: "w:records", "w:phglabs.in+0.5"
+  function timeOf(spec, scene) {
+    const m = /^w:([^+]+)(?:\+([\d.]+))?$/.exec(spec);
+    if (!m) return scene.start + Number(spec);
+    const hit = TL.words.find((w) => w.scene === scene.id && norm(w.w) === m[1]);
+    if (!hit) { console.warn('missing word', spec); return scene.voStart; }
+    return hit.s + Number(m[2] || 0);
+  }
+  const pops = [...document.querySelectorAll('[data-pop]')].map((el) => {
+    const scene = TL.scenes.find((s) => s.id === el.closest('[data-scene]').dataset.scene);
+    return { el, at: timeOf(el.dataset.pop, scene) - 0.06, from: el.dataset.from || 'up', base: el.classList.contains('pill') ? 'translateX(-50%) ' : '' };
+  });
+
+  // Captions: group words into short phrases
+  const groups = [];
+  let cur = null;
+  TL.words.filter((w) => w.scene !== 'cta').forEach((w) => {
+    if (!cur || cur.words.length >= 3 || cur.scene !== w.scene || /[.,?!]$/.test(cur.words[cur.words.length - 1].w)) {
+      cur = { scene: w.scene, words: [] }; groups.push(cur);
+    }
+    cur.words.push(w);
+  });
+  groups.forEach((g) => { g.s = g.words[0].s - 0.05; });
+  groups.forEach((g, i) => {
+    const sceneEnd = TL.scenes.find((s) => s.id === g.scene).end;
+    const next = groups[i + 1];
+    g.e = Math.min(next && next.scene === g.scene ? next.s : g.words[g.words.length - 1].e + 0.35, sceneEnd - 0.1);
+  });
+  const capEl = document.getElementById('captions');
+  let shownGroup = null;
+
+  window.seek = function (t) {
+    // Backgrounds: Ken Burns + zoom-through transitions
+    TL.scenes.forEach((s, i) => {
+      const dur = s.end - s.start, p = clamp((t - s.start) / dur, -0.2, 1.2);
+      const fin = i === 0 ? 1 : prog(t, s.start - 0.12, s.start + 0.18);
+      const fout = i === TL.scenes.length - 1 ? 1 : 1 - prog(t, s.end - 0.12, s.end + 0.18);
+      s.bg.style.opacity = Math.min(fin, fout);
+      const punch = (1 - outCubic(fin)) * 0.18;
+      const [x0, y0, x1, y1] = pan[s.id];
+      const sc = 1.0 + 0.1 * p + punch;
+      s.bg.firstChild.style.transform = `translate(${x0 + (x1 - x0) * p}px, ${y0 + (y1 - y0) * p}px) scale(${sc})`;
+      s.bg.style.filter = `blur(${(1 - fin) * 14}px)` + (s.id === 'problem' ? ' saturate(.75)' : '');
+      s.bg.style.display = fin > 0 && fout > 0 ? 'block' : 'none';
+      // Foreground
+      const ein = prog(t, s.start - 0.05, s.start + 0.1), eout = 1 - prog(t, s.end - 0.15, s.end + 0.05);
+      s.el.style.opacity = Math.min(ein, eout);
+      s.el.style.transform = `scale(${1 + (1 - eout) * 0.06})`;
+      s.el.style.filter = eout < 1 ? `blur(${(1 - eout) * 10}px)` : 'none';
+    });
+
+    // Flash at every cut
+    let fl = 0;
+    TL.scenes.slice(1).forEach((s) => { fl = Math.max(fl, 1 - Math.abs(t - s.start) / 0.14); });
+    document.getElementById('flash').style.opacity = clamp(fl) * 0.28;
+
+    // Pops
+    pops.forEach(({ el, at, from, base }) => {
+      const raw = prog(t, at, at + 0.5), p = outBack(raw), o = outCubic(prog(t, at, at + 0.25));
+      el.style.opacity = o;
+      let tr = '';
+      if (from === 'up') tr = `translateY(${(1 - p) * 60}px)`;
+      if (from === 'left') tr = `translateX(${(1 - p) * -120}px)`;
+      if (from === 'scale') tr = `scale(${0.6 + 0.4 * p})`;
+      if (from === 'stamp') tr = `scale(${1.6 - 0.6 * outCubic(prog(t, at, at + 0.3))}) rotate(${(1 - outCubic(prog(t, at, at + 0.3))) * -4}deg)`;
+      if (from === 'logo') tr = `scale(${0.3 + 0.7 * p}) rotate(${(1 - outCubic(raw)) * -90}deg)`;
+      el.style.transform = base + tr;
+      el.style.filter = from === 'logo' ? `drop-shadow(0 0 ${30 + 20 * Math.sin(t * 3)}px rgba(34,211,238,.6))` : (o < 1 ? `blur(${(1 - o) * 8}px)` : 'none');
+      el.style.transformOrigin = from === 'stamp' ? 'left center' : '';
+    });
+
+    // Hook swoosh under "paper?"
+    const hook = TL.scenes[0];
+    const sw = outCubic(prog(t, timeOf('w:notebooks', hook) - 0.1, timeOf('w:notebooks', hook) + 0.35));
+    document.getElementById('swoosh').style.strokeDashoffset = 1 - sw;
+
+    // CTA URL shine sweep (repeats)
+    const cta = TL.scenes.find((s) => s.id === 'cta');
+    const shineT = ((t - timeOf('w:phglabs.in', cta) - 0.4) % 1.6 + 1.6) % 1.6;
+    document.getElementById('shine').style.left = `${-160 + shineT / 0.7 * 700}px`;
+
+    // Brand bug: hidden in CTA
+    document.getElementById('brand').style.opacity = Math.min(prog(t, 0.2, 0.6), 1 - prog(t, cta.start - 0.2, cta.start + 0.1));
+
+    // Phone: enters in AyurOS, scrolls to Shop Stock, leaves at Custom
+    const ay = TL.scenes.find((s) => s.id === 'ayuros'), ss = TL.scenes.find((s) => s.id === 'shopstock');
+    const pin = outCubic(prog(t, ay.start + 0.2, ay.start + 0.9)), pout = inOutCubic(prog(t, ss.end - 0.35, ss.end + 0.05));
+    const phone = document.getElementById('phone');
+    phone.style.opacity = Math.min(pin, 1 - pout);
+    phone.style.transform = `perspective(1600px) translateY(${(1 - pin) * 500 + pout * 300}px) rotateY(${-14 + 4 * Math.sin(t * 0.8)}deg) rotateZ(${3 - 3 * pin}deg)`;
+    const k = 412 / 390, view = 872 / k;
+    let y = 0;
+    y += (OFF.ayuros - 60) * inOutCubic(prog(t, ay.start + 0.6, ay.start + 2.0));
+    y += (OFF.shopstock - OFF.ayuros) * inOutCubic(prog(t, ss.start - 0.1, ss.start + 0.9));
+    document.getElementById('site').style.transform = `translateY(${-y * k}px)`;
+
+    // Captions
+    const g = groups.find((g) => t >= g.s && t < g.e);
+    if (g !== shownGroup) {
+      capEl.innerHTML = g ? `<div class="box">${g.words.map((w) => `<span>${w.w}</span>`).join('')}</div>` : '';
+      shownGroup = g;
+    }
+    if (g) {
+      const p = outBack(prog(t, g.s, g.s + 0.25));
+      capEl.style.transform = `scale(${0.85 + 0.15 * p})`;
+      capEl.style.opacity = prog(t, g.s, g.s + 0.12) * (1 - prog(t, g.e - 0.08, g.e));
+      [...capEl.firstChild.children].forEach((sp, i) => {
+        const w = g.words[i], on = t >= w.s - 0.03;
+        sp.className = on && (i === g.words.length - 1 || t < g.words[i + 1].s - 0.03) ? 'on' : '';
+        sp.style.opacity = on ? 1 : 0.55;
+      });
+    }
+  };
+  window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((im) => im.decode().catch(() => {}))]);
+</script>
+</body>
+</html>

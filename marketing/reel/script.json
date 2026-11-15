@@ -1,0 +1,10 @@
+{
+  "scenes": [
+    { "id": "hook",      "headline": "Still on paper?",        "vo": "Still running your clinic or shop on notebooks and guesswork?" },
+    { "id": "problem",   "headline": "It adds up.",            "vo": "Lost records. Missing stock. Late bills. It all adds up." },
+    { "id": "ayuros",    "headline": "AyurOS",                 "vo": "AyurOS runs your Ayurvedic clinic. Patients, prescriptions and Panchakarma, all in one place." },
+    { "id": "shopstock", "headline": "Shop Stock",             "vo": "Shop Stock tracks every item, warns you before you run out, and bills in seconds." },
+    { "id": "custom",    "headline": "Built for you",          "vo": "Need something unique? We build custom web and mobile apps around your business." },
+    { "id": "cta",       "headline": "Book a free demo",       "vo": "PHG Labs. Book your free demo today at P H G labs dot in." }
+  ]
+}
