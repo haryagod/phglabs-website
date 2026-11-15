@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
   <style>
     .sudoku { display: grid; grid-template-columns: repeat(9, 1fr); width: 100%; max-width: 520px; aspect-ratio: 1; margin: 0 auto; border: 3px solid #A5B4FC; border-radius: 12px; overflow: hidden; background: #0A0F24; user-select: none; }
     .sudoku button { border: 0; border-right: 1px solid rgba(255,255,255,.12); border-bottom: 1px solid rgba(255,255,255,.12); background: transparent; color: #67E8F9;
@@ -175,10 +175,25 @@ document.addEventListener("DOMContentLoaded", function () {
   function put(n) {
     if (done || sel < 0 || puzzle[sel]) return;
     cells[sel] = n; render(); check();
+    if (done || !n) return;
+    var el = $("grid").children[sel];
+    if (el.classList.contains("conflict")) PLAY.fx.bad(el); else glowUnits(sel);
+  }
+  // A finished row, column or box flashes green
+  function glowUnits(i) {
+    var r = Math.floor(i / 9), c = i % 9, br = r - r % 3, bc = c - c % 3, units = [[], [], []], any = false, bad = conflicts();
+    for (var k = 0; k < 9; k++) { units[0].push(r * 9 + k); units[1].push(k * 9 + c); units[2].push((br + Math.floor(k / 3)) * 9 + bc + k % 3); }
+    units.forEach(function (u) {
+      if (!u.every(function (j) { return cells[j] && !bad.has(j); })) return;
+      any = true;
+      u.forEach(function (j) { $("grid").children[j].classList.add("fx-glow"); });
+    });
+    PLAY.fx.sound(any ? "good" : "pop");
   }
   function check() {
     if (cells.indexOf(0) >= 0 || conflicts().size) return;
     done = true;
+    PLAY.fx.win($("grid"));
     var secs = Math.round((Date.now() - start) / 1000);
     var isBest = hints === 0 && PLAY.best("sudoku-" + level, secs, true);
     if (isBest) $("s-best").textContent = fmt(secs);

@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/chess.css">
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
 </head>
 <body>
 <main>
@@ -69,7 +69,7 @@
   </div>
 </main>
 <script type="module">
-  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js";
+  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js?v=2";
   const $ = (id) => document.getElementById(id);
   let level = PLAY.load("chess-level", "easy"), run, row, solved = PLAY.load("chess-solved", 0), streak = 0, finished = false;
   const board = createBoard($("board"), undefined, "w");
@@ -93,13 +93,13 @@
   function onState(s) {
     if (s.player) turnLabel(s.player);
     if (s.status === "your-move") $("status").innerHTML = `<strong>Your move.</strong> Find the best move for ${s.player === "w" ? "White" : "Black"}.`;
-    if (s.status === "correct") $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…';
-    if (s.status === "wrong") { streak = 0; stats(); $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again, or use a hint.'; }
+    if (s.status === "correct") { $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…'; PLAY.fx.good($("status")); }
+    if (s.status === "wrong") { streak = 0; stats(); PLAY.fx.bad($("board")); $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again, or use a hint.'; }
     if (s.status === "solved" || s.status === "shown") {
       if (finished) return;
       finished = true;
       const clean = s.status === "solved" && s.mistakes === 0;
-      if (s.status === "solved") { solved++; PLAY.save("chess-solved", solved); }
+      if (s.status === "solved") { solved++; PLAY.save("chess-solved", solved); PLAY.fx.win(); }
       streak = clean ? streak + 1 : 0;
       stats();
       const themes = explainThemes(row[4]);

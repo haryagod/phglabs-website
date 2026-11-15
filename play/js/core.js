@@ -85,6 +85,142 @@
   }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
+  // ---- Effects: sounds (synthesized with Web Audio, no files), haptics, confetti and small animations ---
+  // Games call PLAY.fx.good(el, "+1"), .bad(el), .win(el), .lose(el) or .sound("move"). One header toggle mutes
+  // sound and vibration together. Animations are skipped for visitors who ask for reduced motion.
+  var soundOn = load("sound", true), ac = null, master = null;
+  var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  function audio() {
+    if (!soundOn) return null;
+    try {
+      if (!ac) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        ac = new AC(); master = ac.createGain(); master.gain.value = 0.35; master.connect(ac.destination);
+      }
+      if (ac.state === "suspended") ac.resume();
+      return ac;
+    } catch (e) { return null; }
+  }
+  // One note: wave type, frequency (Hz), start offset and length (s), volume, optional pitch glide target
+  function note(type, f, at, dur, vol, to) {
+    var a = audio(); if (!a) return;
+    var t = a.currentTime + (at || 0), o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  // A short filtered noise burst (the "wood" in chess moves)
+  function noise(at, dur, vol, freq) {
+    var a = audio(); if (!a) return;
+    var n = Math.ceil(a.sampleRate * dur), buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    var s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), t = a.currentTime + (at || 0);
+    s.buffer = buf; f.type = "bandpass"; f.frequency.value = freq; f.Q.value = 1.2; g.gain.value = vol;
+    s.connect(f); f.connect(g); g.connect(master); s.start(t);
+  }
+  var SOUNDS = {
+    tap: function () { note("sine", 880, 0, 0.05, 0.1, 660); },
+    good: function () { note("triangle", 1318.5, 0, 0.18, 0.3); note("triangle", 1975.5, 0.08, 0.35, 0.28); },
+    bad: function () { note("square", 220, 0, 0.12, 0.05, 196); note("square", 165, 0.1, 0.22, 0.05, 147); },
+    win: function () {
+      [523.25, 659.25, 783.99, 1046.5].forEach(function (f, i) { note("triangle", f, i * 0.09, 0.3, 0.25); });
+      note("triangle", 1318.5, 0.38, 0.7, 0.22); note("sine", 2093, 0.42, 0.6, 0.07);
+    },
+    lose: function () { [392, 349.23, 311.13].forEach(function (f, i) { note("triangle", f, i * 0.16, 0.32, 0.18); }); },
+    move: function () { noise(0, 0.07, 0.6, 900); note("sine", 180, 0, 0.06, 0.15); },
+    capture: function () { noise(0, 0.1, 0.9, 700); noise(0.04, 0.08, 0.6, 1400); note("sine", 140, 0, 0.09, 0.2); },
+    check: function () { note("square", 880, 0, 0.08, 0.05); note("square", 880, 0.11, 0.08, 0.05); },
+    tick: function () { note("sine", 1200, 0, 0.035, 0.08); },
+    pop: function () { note("sine", 500, 0, 0.09, 0.18, 1100); }
+  };
+  var HAPTIC = { tap: 8, good: [12, 40, 18], bad: 70, win: [20, 50, 20, 50, 40], lose: 120, move: 10, capture: 18, check: [15, 30, 15] };
+  function sound(name) {
+    if (!soundOn) return;
+    if (SOUNDS[name]) SOUNDS[name]();
+    if (HAPTIC[name] && navigator.vibrate) { try { navigator.vibrate(HAPTIC[name]); } catch (e) { /* ignore */ } }
+  }
+  function anim(el, cls) {
+    if (!el || reduced) return;
+    el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+    clearTimeout(el["_" + cls]);
+    el["_" + cls] = setTimeout(function () { el.classList.remove(cls); }, 800);
+  }
+  function layer(cls, x, y) {
+    var d = document.createElement("div");
+    d.className = cls; d.style.left = x + "px"; d.style.top = y + "px"; d.setAttribute("aria-hidden", "true");
+    document.body.appendChild(d);
+    return d;
+  }
+  // "+1" that floats up from an element
+  function floatText(el, text, color) {
+    if (!el || reduced) return;
+    var r = el.getBoundingClientRect(), f = layer("fx-float", r.left + r.width / 2, r.top + Math.min(r.height / 2, 30));
+    f.textContent = text; if (color) f.style.color = color;
+    setTimeout(function () { f.remove(); }, 1100);
+  }
+  // A small burst of sparks around an element
+  function sparkle(el) {
+    if (!el || reduced) return;
+    var r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    for (var i = 0; i < 12; i++) {
+      var a = (i / 12) * Math.PI * 2 + Math.random() * 0.4, dist = 40 + Math.random() * 50, s = layer("fx-spark", cx, cy);
+      s.style.setProperty("--dx", Math.cos(a) * dist + "px"); s.style.setProperty("--dy", Math.sin(a) * dist + "px");
+      s.style.background = ["#67E8F9", "#A5B4FC", "#4ADE80", "#FBBF24"][i % 4];
+      setTimeout(function (s) { s.remove(); }.bind(null, s), 700);
+    }
+  }
+  // Full-screen confetti for a finished round or a solved puzzle
+  function confetti() {
+    if (reduced) return;
+    var c = document.createElement("canvas"), x = c.getContext("2d"), W = c.width = innerWidth, H = c.height = innerHeight, parts = [];
+    c.className = "fx-confetti"; c.setAttribute("aria-hidden", "true"); document.body.appendChild(c);
+    var colors = ["#6366F1", "#22D3EE", "#4ADE80", "#FBBF24", "#F472B6", "#FFFFFF"];
+    for (var i = 0; i < 140; i++) {
+      var left = i % 2 === 0;
+      parts.push({ x: left ? 0 : W, y: H * 0.65, vx: (left ? 1 : -1) * (4 + Math.random() * 9), vy: -(9 + Math.random() * 11),
+        r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.4, w: 6 + Math.random() * 6, h: 8 + Math.random() * 8, c: colors[i % colors.length] });
+    }
+    var t0 = performance.now();
+    (function frame(now) {
+      var age = now - t0;
+      x.clearRect(0, 0, W, H);
+      parts.forEach(function (p) {
+        p.vy += 0.35; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        x.save(); x.globalAlpha = Math.max(0, 1 - age / 2200); x.translate(p.x, p.y); x.rotate(p.r);
+        x.fillStyle = p.c; x.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2))); x.restore();
+      });
+      if (age < 2200) requestAnimationFrame(frame); else c.remove();
+    })(t0);
+  }
+  var fx = {
+    sound: sound, float: floatText, sparkle: sparkle, confetti: confetti,
+    pop: function (el) { anim(el, "fx-pop"); },
+    good: function (el, text) { sound("good"); anim(el, "fx-pop"); sparkle(el); if (text) floatText(el, text); },
+    bad: function (el) { sound("bad"); anim(el, "fx-shake"); },
+    win: function (el) { sound("win"); confetti(); if (el) anim(el, "fx-pop"); },
+    lose: function (el) { sound("lose"); anim(el, "fx-shake"); }
+  };
+  // Every button gives a soft click (capture phase, so it plays before the game's own result sound)
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest("button, a.btn");
+    if (b && !b.disabled && !b.classList.contains("sound-toggle")) sound("tap");
+  }, true);
+  function soundButton() {
+    var b = document.createElement("button");
+    b.className = "sound-toggle"; b.type = "button";
+    var paint = function () {
+      b.textContent = soundOn ? "🔊" : "🔇";
+      b.setAttribute("aria-pressed", String(soundOn));
+      b.setAttribute("aria-label", soundOn ? "Sound on. Click to mute" : "Sound off. Click to turn on");
+      b.title = soundOn ? "Mute sounds" : "Turn sounds on";
+    };
+    b.onclick = function () { soundOn = !soundOn; save("sound", soundOn); paint(); if (soundOn) sound("pop"); };
+    paint();
+    return b;
+  }
+
   // ---- Header, footer, ads ----------------------------------------------------------------------------
   function chrome() {
     var path = location.pathname;
@@ -95,6 +231,7 @@
         var active = n[0] === path || (n[0] === "/chess/" && path.indexOf("/chess/") === 0);
         return '<a href="' + n[0] + '"' + (active ? ' class="active" aria-current="page"' : "") + ">" + n[1] + "</a>";
       }).join("") + "</nav></div>";
+    header.querySelector(".nav").appendChild(soundButton());
     document.body.insertBefore(header, document.body.firstChild);
 
     var footer = document.createElement("footer");
@@ -123,7 +260,7 @@
   }
 
   window.PLAY = { load: load, save: save, best: best, getBest: getBest, today: today, dayNumber: dayNumber, markDaily: markDaily,
-    dailyState: dailyState, toast: toast, share: share, shuffle: shuffle, esc: esc };
+    dailyState: dailyState, toast: toast, share: share, shuffle: shuffle, esc: esc, fx: fx };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { chrome(); ads(); });
   else { chrome(); ads(); }

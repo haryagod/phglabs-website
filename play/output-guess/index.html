@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
   <script src="/js/code.js" defer></script>
   <script src="/data/output-guess.js" defer></script>
 </head>
@@ -89,19 +89,20 @@ document.addEventListener("DOMContentLoaded", function () {
     if (c === q.answer) {
       if (firstTry) score++;
       document.querySelectorAll(".choice").forEach(function (b) { b.disabled = true; });
-      btn.classList.add("right");
+      btn.classList.add("right"); PLAY.fx.good(btn, firstTry ? "+1" : "");
       $("feedback").innerHTML = '<div class="feedback good"><strong>' + (firstTry ? "Correct! +1" : "That's it.") + "</strong> " + q.explain + "</div>";
       $("next").textContent = i === Q.length - 1 ? "See my result →" : "Next level →";
       $("next").classList.remove("hidden");
     } else {
       firstTry = false;
-      btn.classList.add("wrong"); btn.disabled = true;
+      btn.classList.add("wrong"); btn.disabled = true; PLAY.fx.bad(btn);
       $("feedback").innerHTML = '<div class="feedback bad"><strong>Not quite.</strong> Try another answer.</div>';
     }
     stats();
   }
   function finish() {
     var isBest = PLAY.best("output-guess", score);
+    PLAY.fx.win();
     $("bar").style.width = "100%";
     $("game").innerHTML = '<h2>You scored ' + score + " / " + Q.length + "</h2>" +
       "<p>" + (score >= 13 ? "Excellent! You really know your JavaScript." : score >= 9 ? "Good job! A few traps got you; read the explanations again." : "JavaScript is full of surprises. Try again, and the explanations will stick.") + "</p>" +

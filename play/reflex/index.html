@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
   <style>
     .arena { min-height: 340px; border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
       padding: 24px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: background .1s; }
@@ -87,17 +87,19 @@ document.addEventListener("DOMContentLoaded", function () {
   function press(e) {
     if (e && e.cancelable) e.preventDefault();
     if (state === "idle" || state === "result") { if (state === "result") times = []; $("after").classList.add("hidden"); stats(); wait(); }
-    else if (state === "wait") { clearTimeout(waitT); state = "early"; set("wait", "Too early!", "Tap to try again."); }
+    else if (state === "wait") { clearTimeout(waitT); state = "early"; set("wait", "Too early!", "Tap to try again."); PLAY.fx.bad($("arena")); }
     else if (state === "early") wait();
     else if (state === "go") {
       var t = Math.round(performance.now() - goAt);
       times.push(t); stats();
-      if (times.length < TRIES) { state = "between"; set("idle", t + " ms", "Tap to keep going."); }
+      if (times.length < TRIES) { state = "between"; set("idle", t + " ms", "Tap to keep going.");
+        PLAY.fx.float($("arena"), t + " ms", t < 250 ? "#4ADE80" : "#FBBF24"); PLAY.fx.sound(t < 250 ? "good" : "pop"); }
       else {
         var avg = Math.round(times.reduce(function (a, b) { return a + b; }) / TRIES);
         var isBest = PLAY.best("reflex", avg, true);
         var verdict = avg < 200 ? "Lightning fast! ⚡" : avg < 250 ? "Very quick!" : avg < 320 ? "Nice, that's a typical human reaction time." : "Warm up and try again!";
         state = "result"; set("result", "Average: " + avg + " ms", verdict + (isBest ? " New personal best!" : "") + "<br><small class='muted'>Tap to play again.</small>");
+        PLAY.fx.win($("arena"));
         $("after").classList.remove("hidden");
         $("share").onclick = function () { PLAY.share("My reaction time is " + avg + " ms on the PHG Labs Reflex Test ⚡ How fast are you?"); };
         stats();

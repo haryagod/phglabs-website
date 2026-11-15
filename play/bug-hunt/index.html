@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
   <script src="/js/code.js" defer></script>
   <script src="/data/bug-hunt.js" defer></script>
 </head>
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (n === l.bug) {
       solved = true;
       if (firstTry) score++;
-      ln.classList.add("picked-good");
+      ln.classList.add("picked-good"); PLAY.fx.good(ln, firstTry ? "+1" : "");
       $("feedback").innerHTML = '<div class="feedback good"><strong>' + (firstTry ? "Found it! +1" : "Found it!") + "</strong> " + l.explain +
         '<p style="margin:10px 0 4px" class="muted">Fixed line ' + l.bug + ':</p><div class="code" id="fix"></div></div>';
       renderCode($("fix"), l.fix, false);
@@ -103,13 +103,14 @@ document.addEventListener("DOMContentLoaded", function () {
       $("next").classList.remove("hidden");
     } else {
       firstTry = false;
-      ln.classList.add("picked-bad");
+      ln.classList.add("picked-bad"); PLAY.fx.bad(ln);
       $("feedback").innerHTML = '<div class="feedback bad"><strong>Line ' + n + ' is fine.</strong> Keep looking. Think about what the code should produce.</div>';
     }
     stats();
   }
   function finish() {
     var isBest = PLAY.best("bug-hunt", score);
+    PLAY.fx.win();
     $("bar").style.width = "100%";
     $("game").innerHTML = "<h2>You found " + score + " / " + L.length + " bugs on the first try</h2>" +
       "<p>" + (score >= 13 ? "Sharp eyes! You debug like a pro." : score >= 9 ? "Nice work. Read the explanations for the ones you missed." : "Debugging takes practice. Play again and the patterns will start to jump out.") + "</p>" +

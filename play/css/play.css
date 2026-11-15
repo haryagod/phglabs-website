@@ -150,4 +150,25 @@ main { flex: 1; padding: 28px 0 56px; }
   padding: 12px 18px; border-radius: 12px; font-weight: 600; box-shadow: var(--shadow); transition: all .25s; z-index: 100; pointer-events: none; max-width: calc(100% - 32px); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ---- Effects (js/core.js PLAY.fx) ---- */
+.sound-toggle { flex: none; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); font-size: 1.1rem; cursor: pointer; line-height: 1; }
+.sound-toggle:hover { border-color: var(--cyan); }
+@media (max-width: 640px) { .sound-toggle { order: 1; margin-left: auto; width: 36px; height: 36px; } .nav-links { order: 2; } }
+.fx-pop { animation: fx-pop .5s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes fx-pop { 0% { transform: scale(1); } 35% { transform: scale(1.07); box-shadow: 0 0 0 6px rgba(74, 222, 128, .25), 0 0 30px rgba(74, 222, 128, .35); } 100% { transform: scale(1); } }
+.fx-shake { animation: fx-shake .42s ease; }
+@keyframes fx-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+.fx-float { position: fixed; z-index: 90; pointer-events: none; transform: translate(-50%, -50%); font: 900 1.6rem Inter, sans-serif; color: #4ADE80;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, .6); animation: fx-float 1.05s ease-out forwards; }
+@keyframes fx-float { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -80%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -260%) scale(1); } }
+.fx-spark { position: fixed; z-index: 90; pointer-events: none; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; animation: fx-spark .65s ease-out forwards; }
+@keyframes fx-spark { 0% { opacity: 1; transform: translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.3); } }
+.fx-confetti { position: fixed; inset: 0; z-index: 95; pointer-events: none; }
+.fx-glow { animation: fx-glow .8s ease; }
+@keyframes fx-glow { 0% { box-shadow: inset 0 0 0 99px rgba(74, 222, 128, 0); } 30% { box-shadow: inset 0 0 0 99px rgba(74, 222, 128, .35); } 100% { box-shadow: inset 0 0 0 99px rgba(74, 222, 128, 0); } }
+.digits.fx-in { animation: fx-in .35s cubic-bezier(.34, 1.56, .64, 1); }
+@keyframes fx-in { 0% { opacity: 0; transform: scale(.6); letter-spacing: .6em; } 100% { opacity: 1; transform: scale(1); } }
+.arena.go { animation: fx-go .25s ease-out; }
+@keyframes fx-go { 0% { transform: scale(.97); } 100% { transform: scale(1); } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

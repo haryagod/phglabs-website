@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
   <style>
     .stage { min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; }
     .digits { font: 800 clamp(2rem, 9vw, 4rem) var(--mono); letter-spacing: .12em; color: #fff; word-break: break-all; }
@@ -81,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     while (number.length < len) number += Math.floor(Math.random() * 10);
     var ms = 1000 + len * 600;
     $("stage").innerHTML = '<div class="digits">' + number + '</div><div class="bar"><i id="bar"></i></div>';
+    document.querySelector("#stage .digits").classList.add("fx-in"); PLAY.fx.sound("pop");
     var bar = $("bar"); bar.style.transition = "none"; bar.style.width = "100%";
     requestAnimationFrame(function () { requestAnimationFrame(function () { bar.style.transition = "width " + ms + "ms linear"; bar.style.width = "0%"; }); });
     clearTimeout(hideT); hideT = setTimeout(ask, ms);
@@ -96,15 +97,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (v === number) {
       best = Math.max(best, len); len++;
       $("stage").innerHTML = '<h2 class="grad">Correct!</h2><p class="muted">Next: ' + len + ' digits</p><button class="btn" id="go">Next →</button>';
+      PLAY.fx.good(document.querySelector("#stage h2"), "+1 digit");
       $("go").onclick = show; $("go").focus(); stats(); return;
     }
     lives--;
     var cmp = number.split("").map(function (d, i) { return v[i] === d ? d : '<span class="x">' + d + "</span>"; }).join("");
     if (lives > 0) {
       $("stage").innerHTML = '<h2>Not quite</h2><p class="muted">The number was</p><div class="cmp">' + cmp + '</div><p class="muted">You typed ' + (PLAY.esc(v) || "nothing") + '. One life left: same length again.</p><button class="btn" id="go">Try again</button>';
+      PLAY.fx.bad(document.querySelector("#stage .cmp"));
       $("go").onclick = show; $("go").focus(); stats(); return;
     }
     var isBest = best > 0 && PLAY.best("digit-memory", best);
+    if (isBest || best >= 7) PLAY.fx.win(); else PLAY.fx.lose();
     $("stage").innerHTML = '<h2>Your digit span: ' + best + "</h2><p class='muted'>The last number was</p><div class='cmp'>" + cmp + "</div>" +
       "<p>" + (best >= 9 ? "Incredible memory!" : best >= 7 ? "Above average. Nicely done!" : "Most people manage 5 to 9. Try chunking the digits!") + (isBest ? " <strong class='grad'>New best!</strong>" : "") + "</p>" +
       '<div class="btn-row" style="justify-content:center"><button class="btn" id="again">Play again</button><button class="btn btn-ghost" id="share">Share</button></div>';

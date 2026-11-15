@@ -28,3 +28,15 @@ Pages use absolute paths (`/css/...`), so serve `play/` as the root.
 
 Ads are off. After `play.phglabs.in` is approved in AdSense, put the publisher ID in `ADSENSE_CLIENT` in `js/core.js`;
 every `<div class="ad">` slot then shows an ad. Also add an `ads.txt` at the root of **phglabs.in**.
+
+## Sound and effects
+
+`PLAY.fx` in `js/core.js` gives every game feedback without any audio files: sounds are synthesized with Web Audio,
+plus phone vibration, sparks, a floating "+1", shake on a wrong answer and confetti on a win. Games call
+`PLAY.fx.good(el, "+1")`, `.bad(el)`, `.win(el)`, `.lose(el)` or `.sound("move" | "capture" | "check" | "tick" | "pop")`.
+The 🔊 button in the header mutes sound and vibration (saved per visitor); animations are skipped for visitors who
+prefer reduced motion.
+
+**Cache busting:** nginx caches JS and CSS for a day, so pages load `core.js`, `play.css` and `chess-ui.js` with `?v=N`.
+When you change one of those files in a way the pages depend on, bump the number everywhere
+(`grep -rl "?v=2" play | xargs sed -i "s/?v=2/?v=3/g"`).

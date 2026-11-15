@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/chess.css">
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
 </head>
 <body>
 <main>
@@ -55,7 +55,7 @@
   </div>
 </main>
 <script type="module">
-  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js";
+  import { createBoard, runPuzzle, loadPuzzles, explainThemes } from "/js/chess-ui.js?v=2";
   const $ = (id) => document.getElementById(id);
   const day = PLAY.dayNumber();
   $("date").textContent = "Daily puzzle · " + new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
@@ -73,13 +73,14 @@
     $("s-mistakes").textContent = s.mistakes || 0;
     if (s.status === "loading") $("status").innerHTML = "<strong>Watch your opponent's move…</strong>";
     if (s.status === "your-move") $("status").innerHTML = `<strong>Your move.</strong> Find the best move for ${s.player === "w" ? "White" : "Black"}.`;
-    if (s.status === "correct") $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…';
-    if (s.status === "wrong") $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again.';
+    if (s.status === "correct") { $("status").innerHTML = '<strong style="color:#4ADE80">✓ Good move!</strong> Keep going…'; PLAY.fx.good($("status")); }
+    if (s.status === "wrong") { $("status").innerHTML = '<strong style="color:#F87171">✗ Not the best move.</strong> Try again.'; PLAY.fx.bad($("board")); }
     if ((s.status === "solved" || s.status === "shown") && !finished) {
       finished = true;
       const themes = explainThemes(row[4]);
       let head;
       if (s.status === "solved") {
+        PLAY.fx.win();
         const r = PLAY.markDaily("chess-daily");
         $("s-streak").textContent = r.streak;
         head = `<strong style="color:#4ADE80">${s.mistakes ? "✓ Solved!" : "🎉 Solved, perfectly!"}</strong> ${r.streak > 1 ? r.streak + "-day streak 🔥" : "Come back tomorrow for the next one."}`;

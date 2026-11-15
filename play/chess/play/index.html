@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
+  <link rel="stylesheet" href="/css/play.css?v=2">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8590058399315809" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="/css/chess.css">
-  <script src="/js/core.js" defer></script>
+  <script src="/js/core.js?v=2" defer></script>
 </head>
 <body>
 <main>
@@ -67,7 +67,7 @@
   </div>
 </main>
 <script type="module">
-  import { createBoard, enableInput, markLastMove, tryMove, Chess, COLOR } from "/js/chess-ui.js";
+  import { createBoard, enableInput, markLastMove, tryMove, moveSound, Chess, COLOR } from "/js/chess-ui.js?v=2";
   const $ = (id) => document.getElementById(id);
   const LEVELS = [
     { name: "1", skill: 0, go: "depth 1" },
@@ -127,6 +127,7 @@
     if (game.isCheckmate()) {
       const won = turn !== player;
       won ? r.w++ : r.l++;
+      if (won) PLAY.fx.win(); else PLAY.fx.lose($("board"));
       msg = won ? "🏆 <strong>Checkmate, you win!</strong> Try the next level?" : "<strong>Checkmate.</strong> The computer wins this time. Take back a move or try again.";
     } else {
       r.d++;
@@ -149,6 +150,7 @@
       const m = tryMove(game, uci.slice(0, 2), uci.slice(2, 4), uci[4]);
       if (!m) return;
       board.setPosition(game.fen(), true);
+      moveSound(game, m);
       markLastMove(board, m.from, m.to);
       persist(); status();
       if (!over) enableInput(board, game, player, playerMove);
@@ -159,6 +161,7 @@
     const m = tryMove(game, from, to, promo);
     if (!m) { board.setPosition(game.fen(), true); return; }
     board.setPosition(game.fen(), true);
+    moveSound(game, m);
     markLastMove(board, m.from, m.to);
     persist(); status();
     setTimeout(computerMove, 250);

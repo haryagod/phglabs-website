@@ -16,8 +16,8 @@ const head = (title, desc, path, extra = '') => `<!doctype html>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/play.css">
-${path ? ADSENSE : ''}  <script src="/js/core.js" defer></script>
+  <link rel="stylesheet" href="/css/play.css?v=2">
+${path ? ADSENSE : ''}  <script src="/js/core.js?v=2" defer></script>
 </head>
 <body>
 <main>

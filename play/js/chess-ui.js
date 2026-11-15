@@ -61,6 +61,12 @@ export function enableInput(board, game, color, onMove) {
 }
 
 /** Tries a move on a chess.js game; returns the move or null instead of throwing. */
+/** Wood "clack" for a move, a heavier one for a capture, plus a double beep for check. */
+export function moveSound(game, m) {
+  if (!window.PLAY || !m) return;
+  PLAY.fx.sound(m.captured ? "capture" : "move");
+  if (game.inCheck()) setTimeout(() => PLAY.fx.sound("check"), 120);
+}
 export function tryMove(game, from, to, promotion) {
   try { return game.move({ from, to, promotion: promotion || "q" }); } catch (e) { return null; }
 }
@@ -88,6 +94,7 @@ export function runPuzzle(board, row, onState) {
     const m = uciMove(game, moves[step]);
     step++;
     board.setPosition(game.fen(), true);
+    moveSound(game, m);
     markLastMove(board, m.from, m.to);
     if (step >= moves.length) return finish();
     onState({ status: "your-move", player, mistakes });
@@ -108,6 +115,7 @@ export function runPuzzle(board, row, onState) {
     const played = tryMove(game, from, to, m.promotion);
     step++;
     board.setPosition(game.fen(), true);
+    moveSound(game, played);
     markLastMove(board, played.from, played.to);
     if (step >= moves.length || game.isCheckmate()) return finish();
     board.disableMoveInput();
