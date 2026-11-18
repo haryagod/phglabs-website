@@ -12,6 +12,8 @@ const head = (title, desc, path, extra = '') => `<!doctype html>
   <title>${title}</title>
   <meta name="description" content="${desc}">
   ${path ? `<link rel="canonical" href="https://play.phglabs.in${path}">` : extra}
+  <meta property="og:image" content="https://play.phglabs.in/og.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +27,7 @@ ${path ? ADSENSE : ''}  <script src="/js/core.js?v=2" defer></script>
 `;
 const foot = `  </div>
 </main>
+<footer class="site-footer"><div class="container footer-row"><span>© 2026 PHG Labs · Free games for curious minds</span><nav class="footer-links" aria-label="Footer"><a href="/about/">About</a><a href="/contact/">Contact</a><a href="/privacy/">Privacy</a><a href="/credits/">Credits</a><a href="https://phglabs.in/" rel="noopener">phglabs.in</a></nav></div></footer>
 </body>
 </html>
 `;

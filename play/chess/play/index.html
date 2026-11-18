@@ -6,6 +6,8 @@
   <title>Play Chess Against the Computer Free: 5 Levels | PHG Labs Play</title>
   <meta name="description" content="Play chess against the computer for free. Five levels from beginner to strong, powered by Stockfish. Play as White or Black and take back moves.">
   <link rel="canonical" href="https://play.phglabs.in/chess/play/">
+  <meta property="og:image" content="https://play.phglabs.in/og.png">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,6 +93,7 @@
       
       <h3>Is the game fair?</h3>
       <p>Yes. The computer only sees the position on the board, just like you. Its strength depends on the level you choose: the lower levels play weaker on purpose, and the highest level is much stronger.</p>
+      <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can I play as Black or White?","acceptedAnswer":{"@type":"Answer","text":"Yes, you can choose to play as White or Black."}},{"@type":"Question","name":"What happens if I leave the page?","acceptedAnswer":{"@type":"Answer","text":"Your game is saved automatically, so you can come back later and continue from where you left off."}},{"@type":"Question","name":"Can I see my win, loss, and draw record?","acceptedAnswer":{"@type":"Answer","text":"Yes, the page shows your record of wins, losses, and draws. This helps you track your progress over time."}},{"@type":"Question","name":"Is the game fair?","acceptedAnswer":{"@type":"Answer","text":"Yes. The computer only sees the position on the board, just like you. Its strength depends on the level you choose: the lower levels play weaker on purpose, and the highest level is much stronger."}}]}</script>
 <!-- guide:end -->
     </section>
   </div>
@@ -226,5 +229,6 @@
   $("flip").onclick = () => board.setOrientation(board.getOrientation() === COLOR.white ? COLOR.black : COLOR.white, true);
   buttons(); record();
 </script>
+<footer class="site-footer"><div class="container footer-row"><span>© 2026 PHG Labs · Free games for curious minds</span><nav class="footer-links" aria-label="Footer"><a href="/about/">About</a><a href="/contact/">Contact</a><a href="/privacy/">Privacy</a><a href="/credits/">Credits</a><a href="https://phglabs.in/" rel="noopener">phglabs.in</a></nav></div></footer>
 </body>
 </html>

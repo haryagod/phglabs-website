@@ -234,6 +234,8 @@
     header.querySelector(".nav").appendChild(soundButton());
     document.body.insertBefore(header, document.body.firstChild);
 
+    var own = document.querySelector(".site-footer");
+    if (own) { var yr = own.querySelector(".footer-row span"); if (yr) yr.textContent = yr.textContent.replace(/\d{4}/, new Date().getFullYear()); return; }
     var footer = document.createElement("footer");
     footer.className = "site-footer";
     footer.innerHTML = '<div class="container footer-row"><span>© ' + new Date().getFullYear() + ' PHG Labs · Free games for curious minds</span>' +

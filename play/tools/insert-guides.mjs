@@ -12,7 +12,11 @@ for (const file of fs.readdirSync(ROOT + 'tools/drafts').filter((f) => f.endsWit
   if (bad.length) throw new Error(`${file}: unexpected tags ${[...new Set(bad)].join(', ')}`);
   const path = `${ROOT}${page}/index.html`;
   let html = fs.readFileSync(path, 'utf8').replace(/\n    <section class="section card prose guide">\n<!-- guide:start -->[\s\S]*?<!-- guide:end -->\n    <\/section>/, '');
-  const block = `\n    <section class="section card prose guide">\n<!-- guide:start -->\n${draft.replace(/^/gm, '      ')}\n<!-- guide:end -->\n    </section>`;
+  // FAQ structured data from the guide's "Frequently asked questions" (each <h3> question and the <p> after it)
+  const text = (h) => h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  const faq = [...draft.matchAll(/<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => ({ '@type': 'Question', name: text(m[1]), acceptedAnswer: { '@type': 'Answer', text: text(m[2]) } }));
+  const ld = faq.length ? `\n      <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq }).replace(/</g, '\\u003c')}</script>` : '';
+  const block = `\n    <section class="section card prose guide">\n<!-- guide:start -->\n${draft.replace(/^/gm, '      ')}${ld}\n<!-- guide:end -->\n    </section>`;
   const end = html.lastIndexOf('\n  </div>\n</main>');
   if (end < 0) throw new Error(`${page}: no "</div></main>" to insert before`);
   html = html.slice(0, end) + block + html.slice(end);
