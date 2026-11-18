@@ -1,0 +1,281 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PHG Labs Play Reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #0B1026; --grad: linear-gradient(135deg, #6D63FF 0%, #22D3EE 100%); --grad-text: linear-gradient(100deg, #A5A0FF 0%, #67E8F9 70%); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); font-family: Inter, "Segoe UI Emoji", sans-serif; color: #fff; }
+  .abs { position: absolute; }
+  .full { position: absolute; inset: 0; }
+  [data-pop] { opacity: 0; will-change: transform, opacity; }
+
+  /* Background: drifting glow + faint grid */
+  .blob { position: absolute; width: 1400px; height: 1400px; border-radius: 50%; filter: blur(40px); }
+  .b1 { background: radial-gradient(circle, rgba(79,70,229,.55), transparent 62%); }
+  .b2 { background: radial-gradient(circle, rgba(6,182,212,.38), transparent 62%); }
+  .grid { background-image: linear-gradient(rgba(255,255,255,.045) 2px, transparent 2px), linear-gradient(90deg, rgba(255,255,255,.045) 2px, transparent 2px);
+          background-size: 90px 90px; -webkit-mask-image: radial-gradient(ellipse at 50% 45%, #000 25%, transparent 75%); }
+  .vignette { background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%); }
+  .flash { background: var(--grad); mix-blend-mode: screen; opacity: 0; z-index: 40; }
+
+  .brand { left: 60px; top: 92px; display: flex; align-items: center; gap: 14px; font-size: 36px; font-weight: 600; z-index: 10; }
+  .brand b { font-weight: 900; }
+  .brand svg { width: 54px; height: 54px; filter: drop-shadow(0 6px 18px rgba(34,211,238,.45)); }
+  .tag { font-size: 22px; font-weight: 900; letter-spacing: 2px; padding: 6px 14px; border-radius: 999px; background: var(--grad); }
+
+  .h1 { font-weight: 900; letter-spacing: -4px; line-height: 1; text-shadow: 0 10px 40px rgba(0,0,0,.55); }
+  .grad { background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 30px rgba(34,211,238,.35)); }
+  .line { display: block; }
+  .w { display: inline-block; }
+
+  /* Top zone: scene label + live captions */
+  .eyebrow { left: 0; right: 0; top: 196px; text-align: center; font-size: 34px; font-weight: 900; letter-spacing: 7px; text-transform: uppercase; color: #67E8F9; z-index: 10; }
+  .captions { left: 50px; right: 50px; top: 250px; height: 170px; display: flex; align-items: center; justify-content: center; text-align: center; z-index: 20;
+              font-size: 68px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.08; text-shadow: 0 6px 30px rgba(0,0,0,.7); }
+  .captions span { display: inline-block; margin: 0 9px; }
+  .captions span.on { color: #67E8F9; }
+
+  /* Hook tiles */
+  .tile { width: 170px; height: 170px; border-radius: 40px; display: grid; place-items: center; font-size: 76px; font-weight: 900;
+          background: rgba(18, 26, 58, .78); border: 2px solid rgba(255,255,255,.14); box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), inset 0 0 40px rgba(79,70,229,.25); }
+  .tile.code { font-family: Consolas, monospace; font-size: 60px; color: #A5B4FC; }
+  .tile.num { background: var(--grad); }
+
+  /* Phone */
+  .phone { left: 241px; top: 440px; width: 598px; height: 1262px; border-radius: 78px; background: #05070F; padding: 14px; z-index: 5;
+           box-shadow: 0 0 0 3px #2A3150, 0 60px 140px -30px rgba(0,0,0,.95), 0 0 120px -10px rgba(79,70,229,.7); opacity: 0; }
+  .screen { position: relative; width: 570px; height: 1234px; border-radius: 64px; overflow: hidden; background: #0B1026; }
+  .screen img { position: absolute; left: 0; top: 0; width: 570px; height: 1234px; display: none; }
+  .notch { position: absolute; left: 50%; top: 16px; width: 130px; height: 36px; margin-left: -65px; background: #05070F; border-radius: 20px; z-index: 3; }
+  .finger { position: absolute; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; z-index: 4; opacity: 0;
+            background: radial-gradient(circle, rgba(255,255,255,.95) 0 34%, rgba(255,255,255,.35) 36% 60%, transparent 62%); box-shadow: 0 0 30px rgba(103,232,249,.8); }
+  .ring { position: absolute; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 5px solid #67E8F9; z-index: 4; opacity: 0; }
+
+  .badge { left: 610px; top: 500px; z-index: 12; padding: 22px 34px; border-radius: 26px; font-size: 46px; font-weight: 900; letter-spacing: -.5px; white-space: nowrap;
+           background: linear-gradient(135deg, #16A34A, #22C55E); box-shadow: 0 25px 60px -15px rgba(34,197,94,.75), 0 0 0 3px rgba(255,255,255,.2); opacity: 0; transform-origin: 20% 50%; }
+
+  /* CTA */
+  .pill { left: 50%; top: 1150px; padding: 32px 74px; border-radius: 999px; background: var(--grad); font-size: 72px; font-weight: 900;
+          letter-spacing: -1.5px; box-shadow: 0 25px 70px -15px rgba(34,211,238,.75); overflow: hidden; white-space: nowrap; }
+  .pill .shine { position: absolute; top: 0; bottom: 0; width: 150px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.65), transparent); }
+  .chips { left: 0; right: 0; top: 1390px; display: flex; justify-content: center; gap: 18px; }
+  .chip { padding: 18px 26px; border-radius: 22px; font-size: 34px; font-weight: 800; background: rgba(18,26,58,.8); border: 2px solid rgba(255,255,255,.15); }
+</style>
+</head>
+<body>
+  <div class="full" id="bg"><div class="blob b1" id="b1"></div><div class="blob b2" id="b2"></div></div>
+  <div class="full grid"></div>
+  <div class="full vignette"></div>
+
+  <div class="abs brand" id="brand">
+    <svg viewBox="0 0 64 64"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs><polygon points="32,3 57.1,17.5 57.1,46.5 32,61 6.9,46.5 6.9,17.5" fill="url(#g1)"/><g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"><line x1="21" y1="22" x2="43" y2="24"/><line x1="21" y1="22" x2="27" y2="43"/><line x1="43" y1="24" x2="27" y2="43"/><line x1="43" y1="24" x2="45" y2="42"/></g><g fill="#fff"><circle cx="21" cy="22" r="5"/><circle cx="43" cy="24" r="4.2"/><circle cx="27" cy="43" r="4.6"/><circle cx="45" cy="42" r="3"/></g></svg>
+    <span><b>PHG</b> Labs</span><span class="tag">PLAY</span>
+  </div>
+
+  <!-- HOOK -->
+  <div class="full" data-scene="hook">
+    <div class="abs tile code" data-tile style="left:70px; top:330px">&lt;/&gt;</div>
+    <div class="abs tile" data-tile style="left:840px; top:300px">🐞</div>
+    <div class="abs tile num" data-tile style="left:455px; top:250px">27</div>
+    <div class="abs tile" data-tile style="left:60px; top:1270px">⚡</div>
+    <div class="abs tile" data-tile style="left:850px; top:1250px">🧠</div>
+    <div class="abs tile" data-tile style="left:455px; top:1440px">♞</div>
+    <div class="abs h1" style="left:0; right:0; top:640px; text-align:center; font-size:150px;">
+      <span class="line"><span class="w" data-pop="w:how">How</span> <span class="w" data-pop="w:sharp">sharp</span></span>
+      <span class="line"><span class="w" data-pop="w:is">is</span> <span class="w" data-pop="w:your">your</span> <span class="w" data-pop="w:brain">brain,</span></span>
+      <span class="line grad" data-pop="w:really" data-from="stamp">really?</span>
+    </div>
+    <div class="abs" style="left:0; right:0; top:1130px; text-align:center; font-size:60px; font-weight:800; color:#CBD5E1" data-pop="w:lets">Let's find out 👇</div>
+  </div>
+
+  <div class="abs eyebrow" id="eyebrow"></div>
+  <div class="abs captions" id="captions"></div>
+
+  <!-- Phone with the real games -->
+  <div class="abs phone" id="phone"><div class="screen" id="screen"><div class="notch"></div><div class="finger" id="finger"></div><div class="ring" id="ring"></div></div></div>
+  <div class="abs badge" id="badge"></div>
+
+  <!-- CTA -->
+  <div class="full" data-scene="cta">
+    <svg class="abs" style="left:420px; top:300px; width:240px; height:240px;" viewBox="0 0 64 64" data-pop="0.05" data-from="logo">
+      <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+      <polygon points="32,3 57.1,17.5 57.1,46.5 32,61 6.9,46.5 6.9,17.5" fill="url(#g2)"/>
+      <g stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none"><line x1="21" y1="22" x2="43" y2="24"/><line x1="21" y1="22" x2="27" y2="43"/><line x1="43" y1="24" x2="27" y2="43"/><line x1="43" y1="24" x2="45" y2="42"/></g>
+      <g fill="#fff"><circle cx="21" cy="22" r="5"/><circle cx="43" cy="24" r="4.2"/><circle cx="27" cy="43" r="4.6"/><circle cx="45" cy="42" r="3"/></g>
+    </svg>
+    <div class="abs" style="left:0; right:0; top:580px; display:flex; justify-content:center; align-items:center; gap:22px; font-size:84px; font-weight:600; letter-spacing:-2px;" data-pop="0.25">
+      <span><b style="font-weight:900">PHG</b> Labs</span><span class="tag" style="font-size:40px; padding:10px 24px">PLAY</span>
+    </div>
+    <div class="abs h1" style="left:0; right:0; top:740px; text-align:center; font-size:150px;" data-pop="w:free" data-from="stamp">Play <span class="grad">free</span></div>
+    <div class="abs" style="left:0; right:0; top:930px; text-align:center; font-size:52px; font-weight:700; color:#CBD5E1" data-pop="w:signup">No sign-up · Works on your phone</div>
+    <div class="abs pill" data-pop="w:at" data-from="scale"><span>play.phglabs.in</span><i class="shine abs" id="shine"></i></div>
+    <div class="abs chips" data-pop="w:labs">
+      <span class="chip">💻 Code</span><span class="chip">🧩 Puzzles</span><span class="chip">⚡ Brain</span><span class="chip">♞ Chess</span>
+    </div>
+  </div>
+
+  <div class="full flash" id="flash"></div>
+
+<script>
+  const TL = window.TL;
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const prog = (t, a, b) => clamp((t - a) / (b - a));
+  const outCubic = (p) => 1 - Math.pow(1 - p, 3);
+  const inOutCubic = (p) => (p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+  const outBack = (p) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+  const norm = (w) => w.toLowerCase().replace(/[^a-z0-9.]/g, '').replace(/\.$/, '');
+  const S = Object.fromEntries(TL.scenes.map((s) => [s.id, s]));
+  const K = 570 / 390; // CSS px of the game screen -> px on the phone
+
+  const LABEL = { code: '💻 Code games', puzzles: '🧩 Puzzles', brain: '⚡ Brain tests', chess: '♞ Chess' };
+
+  function timeOf(spec, scene) {
+    const m = /^w:([^+]+)(?:\+([\d.]+))?$/.exec(spec);
+    if (!m) return scene.start + Number(spec);
+    const hit = TL.words.find((w) => w.scene === scene.id && norm(w.w) === m[1]);
+    if (!hit) { console.warn('missing word', spec); return scene.voStart; }
+    return hit.s + Number(m[2] || 0);
+  }
+  const pops = [...document.querySelectorAll('[data-pop]')].map((el) => {
+    const scene = S[el.closest('[data-scene]').dataset.scene];
+    return { el, at: timeOf(el.dataset.pop, scene) - 0.06, from: el.dataset.from || 'up', base: el.classList.contains('pill') ? 'translateX(-50%) ' : '' };
+  });
+  const tiles = [...document.querySelectorAll('[data-tile]')];
+
+  // Phone screens
+  const screen = document.getElementById('screen');
+  TL.phone.forEach((p) => { const im = document.createElement('img'); im.src = p.img; screen.insertBefore(im, screen.firstChild); p.el = im; });
+
+  // Captions: short phrases, only while the phone is on screen
+  const groups = [];
+  let cur = null;
+  TL.words.filter((w) => !['hook', 'cta'].includes(w.scene)).forEach((w) => {
+    if (!cur || cur.words.length >= 3 || cur.scene !== w.scene || /[.,?!]$/.test(cur.words[cur.words.length - 1].w)) { cur = { scene: w.scene, words: [] }; groups.push(cur); }
+    cur.words.push(w);
+  });
+  groups.forEach((g, i) => {
+    g.s = g.words[0].s - 0.05;
+    const next = groups[i + 1];
+    g.e = Math.min(next && next.scene === g.scene ? next.s : S[g.scene].end - 0.1, S[g.scene].end - 0.1);
+  });
+  const capEl = document.getElementById('captions'), eyebrow = document.getElementById('eyebrow');
+  let shownGroup = null, shownLabel = null;
+
+  window.seek = function (t) {
+    // Background drift
+    document.getElementById('b1').style.transform = `translate(${-500 + 220 * Math.sin(t * 0.35)}px, ${-300 + 260 * Math.cos(t * 0.27)}px)`;
+    document.getElementById('b2').style.transform = `translate(${200 + 200 * Math.cos(t * 0.31)}px, ${800 + 240 * Math.sin(t * 0.23)}px)`;
+
+    // Scene visibility for hook and CTA layers
+    for (const id of ['hook', 'cta']) {
+      const s = S[id], el = document.querySelector(`[data-scene="${id}"]`);
+      const ein = id === 'hook' ? 1 : prog(t, s.start - 0.05, s.start + 0.15), eout = id === 'cta' ? 1 : 1 - prog(t, s.end - 0.2, s.end + 0.1);
+      el.style.opacity = Math.min(ein, eout);
+      el.style.transform = `scale(${1 + (1 - eout) * 0.15})`;
+      el.style.filter = eout < 1 ? `blur(${(1 - eout) * 12}px)` : 'none';
+    }
+
+    // Hook tiles: pop in one by one, bob, then fly outwards at the cut
+    const hk = S.hook;
+    tiles.forEach((el, i) => {
+      const a = 0.1 + i * 0.12, p = outBack(prog(t, a, a + 0.5)), o = prog(t, a, a + 0.2);
+      const fly = inOutCubic(prog(t, hk.end - 0.35, hk.end + 0.05));
+      const cx = el.offsetLeft + 85 - 540, cy = el.offsetTop + 85 - 900;
+      el.style.opacity = o * (1 - fly);
+      el.style.transform = `translate(${cx * fly * 0.9}px, ${cy * fly * 0.9 + 14 * Math.sin(t * 2.2 + i)}px) scale(${(0.4 + 0.6 * p) * (1 + fly * 0.4)}) rotate(${(i % 2 ? 6 : -6) * Math.sin(t * 1.3 + i)}deg)`;
+    });
+
+    // Flash at every cut
+    let fl = 0;
+    TL.scenes.slice(1).forEach((s) => { fl = Math.max(fl, 1 - Math.abs(t - s.start) / 0.13); });
+    document.getElementById('flash').style.opacity = clamp(fl) * 0.25;
+
+    // Pops
+    pops.forEach(({ el, at, from, base }) => {
+      const raw = prog(t, at, at + 0.5), p = outBack(raw), o = outCubic(prog(t, at, at + 0.22));
+      el.style.opacity = o;
+      let tr = '';
+      if (from === 'up') tr = `translateY(${(1 - p) * 60}px)`;
+      if (from === 'scale') tr = `scale(${0.6 + 0.4 * p})`;
+      if (from === 'stamp') { const q = outCubic(prog(t, at, at + 0.3)); tr = `scale(${1.6 - 0.6 * q}) rotate(${(1 - q) * -4}deg)`; }
+      if (from === 'logo') tr = `scale(${0.3 + 0.7 * p}) rotate(${(1 - outCubic(raw)) * -90}deg)`;
+      el.style.transform = base + tr;
+      el.style.filter = from === 'logo' ? `drop-shadow(0 0 ${30 + 20 * Math.sin(t * 3)}px rgba(34,211,238,.6))` : (o < 1 ? `blur(${(1 - o) * 8}px)` : 'none');
+    });
+
+    // Phone: rises in at Code, sways gently, drops away into the CTA
+    const pin = outCubic(prog(t, S.code.start - 0.15, S.code.start + 0.55)), pout = inOutCubic(prog(t, S.chess.end - 0.4, S.chess.end + 0.1));
+    const phone = document.getElementById('phone');
+    phone.style.opacity = Math.min(prog(t, S.code.start - 0.15, S.code.start + 0.1), 1 - pout);
+    phone.style.transform = `perspective(1800px) translateY(${(1 - pin) * 900 + pout * 120}px) scale(${1 - pout * 0.25}) rotateX(${(1 - pin) * 18}deg) rotateY(${2.5 * Math.sin(t * 0.9)}deg) rotateZ(${0.8 * Math.sin(t * 0.7)}deg)`;
+
+    // Screens: swap within a game, slide sideways between games
+    let ci = -1;
+    TL.phone.forEach((p, i) => { if (t >= p.t) ci = i; });
+    if (ci < 0) ci = 0;
+    TL.phone.forEach((p) => { p.el.style.display = 'none'; });
+    const c = TL.phone[ci], pv = TL.phone[ci - 1];
+    c.el.style.display = 'block'; c.el.style.transform = 'none';
+    if (pv && pv.game !== c.game && t - c.t < 0.38) {
+      const q = inOutCubic(prog(t, c.t, c.t + 0.38));
+      pv.el.style.display = 'block';
+      pv.el.style.transform = `translateX(${-q * 100}%)`;
+      c.el.style.transform = `translateX(${(1 - q) * 100}%)`;
+    }
+
+    // Finger taps
+    const tap = TL.taps.filter((x) => t >= x.t - 0.22 && t <= x.t + 0.45).pop();
+    const finger = document.getElementById('finger'), ring = document.getElementById('ring');
+    if (tap) {
+      const dt = t - tap.t;
+      finger.style.left = ring.style.left = tap.x * K + 'px';
+      finger.style.top = ring.style.top = tap.y * K + 'px';
+      finger.style.opacity = dt < 0 ? prog(dt, -0.22, -0.1) : 1 - prog(dt, 0.15, 0.35);
+      finger.style.transform = `scale(${dt < 0 ? 1.25 - 0.25 * prog(dt, -0.22, 0) : 0.85 + 0.15 * prog(dt, 0, 0.15)})`;
+      ring.style.opacity = dt < 0 ? 0 : 1 - prog(dt, 0, 0.45);
+      ring.style.transform = `scale(${1 + 1.6 * outCubic(prog(dt, 0, 0.45))})`;
+    } else { finger.style.opacity = 0; ring.style.opacity = 0; }
+
+    // Result badge (newest one wins; disappears at its scene end)
+    const badge = document.getElementById('badge');
+    const b = TL.badges.filter((x) => t >= x.t - 0.05 && t < x.end).pop();
+    if (b) {
+      if (badge.textContent !== b.text) badge.textContent = b.text;
+      const p = outBack(prog(t, b.t, b.t + 0.4)), out = prog(t, b.end - 0.2, b.end);
+      badge.style.opacity = outCubic(prog(t, b.t, b.t + 0.15)) * (1 - out);
+      badge.style.transform = `scale(${(0.3 + 0.7 * p) * (1 - out * 0.3)}) rotate(${-5 + 2 * Math.sin(t * 2)}deg)`;
+    } else badge.style.opacity = 0;
+
+    // Scene label + captions (top zone)
+    const sc = TL.scenes.find((s) => t >= s.start && t < s.end) || TL.scenes[TL.scenes.length - 1];
+    const label = LABEL[sc.id] || '';
+    if (label !== shownLabel) { eyebrow.textContent = label; shownLabel = label; }
+    eyebrow.style.opacity = label ? Math.min(prog(t, sc.start, sc.start + 0.2), 1 - prog(t, sc.end - 0.15, sc.end)) : 0;
+
+    const g = groups.find((g) => t >= g.s && t < g.e);
+    if (g !== shownGroup) { capEl.innerHTML = g ? g.words.map((w) => `<span>${w.w}</span>`).join('') : ''; shownGroup = g; }
+    if (g) {
+      const p = outBack(prog(t, g.s, g.s + 0.25));
+      capEl.style.transform = `scale(${0.85 + 0.15 * p})`;
+      capEl.style.opacity = prog(t, g.s, g.s + 0.1) * (1 - prog(t, g.e - 0.06, g.e));
+      [...capEl.children].forEach((sp, i) => {
+        const w = g.words[i], on = t >= w.s - 0.03;
+        sp.className = on && (i === g.words.length - 1 || t < g.words[i + 1].s - 0.03) ? 'on' : '';
+        sp.style.opacity = on ? 1 : 0.5;
+      });
+    }
+
+    // Brand bug hides in the CTA (the CTA has its own big logo)
+    document.getElementById('brand').style.opacity = Math.min(prog(t, 0.15, 0.5), 1 - prog(t, S.cta.start - 0.2, S.cta.start + 0.1));
+
+    // URL shine sweep
+    const shineT = ((t - timeOf('w:at', S.cta) - 0.4) % 1.6 + 1.6) % 1.6;
+    document.getElementById('shine').style.left = `${-170 + shineT / 0.7 * 760}px`;
+  };
+  window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((im) => im.decode().catch(() => {}))]);
+</script>
+</body>
+</html>
