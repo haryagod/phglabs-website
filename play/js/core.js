@@ -237,7 +237,7 @@
     var footer = document.createElement("footer");
     footer.className = "site-footer";
     footer.innerHTML = '<div class="container footer-row"><span>© ' + new Date().getFullYear() + ' PHG Labs · Free games for curious minds</span>' +
-      '<nav class="footer-links" aria-label="Footer"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/credits/">Credits</a>' +
+      '<nav class="footer-links" aria-label="Footer"><a href="/about/">About</a><a href="/contact/">Contact</a><a href="/privacy/">Privacy</a><a href="/credits/">Credits</a>' +
       '<a href="https://phglabs.in/" rel="noopener">phglabs.in</a></nav></div>';
     document.body.appendChild(footer);
   }

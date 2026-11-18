@@ -31,7 +31,7 @@ jobs:
         env:
           TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
         run: |
-          tar -czf phglabs-site.tgz --exclude=play/tools index.html robots.txt ads.txt sitemap.xml assets css js branding play
+          tar -czf phglabs-site.tgz --exclude=play/tools index.html 404.html privacy robots.txt ads.txt sitemap.xml assets css js branding play
           ssh "$TARGET" 'mkdir -p ~/phglabs/deploy'
           scp -q phglabs-site.tgz deploy/docker-compose.yml deploy/nginx.conf deploy/phglabs.caddy deploy/update.sh "$TARGET:phglabs/deploy/"
           ssh "$TARGET" 'cd ~/phglabs/deploy && mkdir -p site && find site -mindepth 1 -delete && tar -xzf phglabs-site.tgz -C site && rm phglabs-site.tgz && sh update.sh'

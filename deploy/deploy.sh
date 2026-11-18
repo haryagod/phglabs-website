@@ -11,7 +11,7 @@ KEY="${DEPLOY_KEY:-$HOME/.ssh/shopstock_deploy}"
 SSH="ssh -i $KEY -o BatchMode=yes"
 
 echo "Packing site..."
-tar -czf /tmp/phglabs-site.tgz --exclude=play/tools index.html robots.txt ads.txt sitemap.xml assets css js branding play
+tar -czf /tmp/phglabs-site.tgz --exclude=play/tools index.html 404.html privacy robots.txt ads.txt sitemap.xml assets css js branding play
 echo "Uploading to $USER@$HOST..."
 $SSH "$USER@$HOST" 'mkdir -p ~/phglabs/deploy'
 scp -i "$KEY" -o BatchMode=yes -q /tmp/phglabs-site.tgz deploy/docker-compose.yml deploy/nginx.conf deploy/phglabs.caddy deploy/update.sh "$USER@$HOST:phglabs/deploy/"

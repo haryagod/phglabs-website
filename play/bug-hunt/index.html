@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bug Hunt: Find the Bug in JavaScript Code | PHG Labs Play</title>
-  <meta name="description" content="Spot the one broken line in each JavaScript program. 15 debugging levels covering off-by-one errors, async/await, closures, sorting and more, each with the fix explained.">
+  <meta name="description" content="Spot the one broken line in each JavaScript program. 15 debugging levels: off-by-one errors, async/await, closures, sorting and more, each fix explained.">
   <link rel="canonical" href="https://play.phglabs.in/bug-hunt/">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,6 +63,35 @@
         <li><strong>Closures and this:</strong> var in loops, and functions that lose <code>this</code>.</li>
       </ul>
       <p>Each level is short and has exactly one bug, so you can practise in a few minutes a day.</p>
+    </section>
+    <section class="section card prose guide">
+<!-- guide:start -->
+      <h2>Practical Tips to Find the Bug Faster</h2>
+      <ul>
+        <li><strong>Read the goal first:</strong> The comment at the end or the function name tells you what the code should do. Start by understanding the purpose of the program before looking for errors.</li>
+        <li><strong>Look for common mistakes:</strong> Think about the most common bugs like off-by-one errors, using = instead of ===, or incorrect initial values. These show up often in real code.</li>
+        <li><strong>Check the logic flow:</strong> Follow what the code is doing step by step. Is it looping correctly? Are variables being updated as expected? A single line can break the whole program.</li>
+        <li><strong>Look for missing parts:</strong> Sometimes a line is missing a keyword like <code>await</code> or a necessary condition like a comparison operator. These can make the code not work as intended.</li>
+        <li><strong>Watch for unexpected behavior:</strong> If the code is doing something strange, like not updating a variable or skipping a loop, that’s a clue. Ask yourself, “What should this line be doing instead?”</li>
+      </ul>
+      
+      <h2>Why This Skill Is Useful in Real Life</h2>
+      <p>Debugging is a skill that helps you in more than just coding. Whether you're preparing for an interview, solving a math problem, or even managing a project, the ability to spot where things are going wrong is valuable. In coding interviews, being able to find and fix bugs quickly shows that you understand how code works and can think critically under pressure.</p>
+      <p>Even outside of coding, this skill helps you in daily life. For example, when you're trying to figure out why a recipe didn’t turn out, or why a task isn’t getting done, you're essentially debugging a process. The same logic applies — look for the one thing that’s breaking the whole system, and fix it.</p>
+      
+      <h2>Frequently Asked Questions</h2>
+      <h3>Can I play this game on my phone?</h3>
+      <p>Yes, Bug Hunt works on any device with a web browser, including phones and tablets. Just open the game in your browser and start playing.</p>
+      
+      <h3>Do I need to know JavaScript to play?</h3>
+      <p>Basic JavaScript helps, such as loops, <code>if</code> statements and arrays. You don't need to be an expert: read what the program should do, then look for the line that doesn't match that goal.</p>
+      
+      <h3>How do I know if I’m right?</h3>
+      <p>If you pick a line that's fine, the game tells you so and you can keep looking. When you find the bug, it highlights the line, shows the fixed version and explains what went wrong.</p>
+      
+      <h3>Can I play this game for free?</h3>
+      <p>Yes, Bug Hunt is completely free to play. No sign-up is required, and you can start right away.</p>
+<!-- guide:end -->
     </section>
   </div>
 </main>

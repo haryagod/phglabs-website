@@ -36,6 +36,14 @@ write('about/index.html', head('About PHG Labs Play', 'PHG Labs Play is a free c
     <p>PHG Labs Play is a free collection of games that make you think: coding challenges, logic puzzles, quick brain tests and chess. Everything runs in your browser, there's nothing to install, and you never need an account.</p>
     <h2>Who makes it</h2>
     <p>We're <a href="https://phglabs.in/">PHG Labs</a>, a software company in Karad, Maharashtra, India. We build business software such as <strong>AyurOS</strong> for Ayurvedic clinics and <strong>Shop Stock</strong> for retail shops, along with custom web and mobile apps. We made this site because we enjoy puzzles as much as code, and we think learning should feel like playing.</p>
+    <h2>What you'll find here</h2>
+    <ul>
+      <li><strong>Code games:</strong> <a href="/output-guess/">Output Guess</a> (predict what JavaScript prints) and <a href="/bug-hunt/">Bug Hunt</a> (find the one broken line). Every answer comes with an explanation.</li>
+      <li><strong>Puzzles:</strong> <a href="/sudoku/">Sudoku</a> in three levels and <a href="/number-series/">Number Series</a> for aptitude-test practice.</li>
+      <li><strong>Brain tests:</strong> the <a href="/reflex/">Reflex Test</a> for reaction time and <a href="/digit-memory/">Digit Memory</a> for short-term memory.</li>
+      <li><strong>Chess:</strong> a <a href="/chess/daily/">daily puzzle</a>, a <a href="/chess/puzzles/">puzzle trainer</a> with 2,400 positions from real games, and <a href="/chess/play/">a full game against the computer</a>.</li>
+    </ul>
+    <p>We write every question, explanation and guide ourselves, and we check the code games automatically so every answer is correct.</p>
     <h2>What we believe</h2>
     <ul>
       <li><strong>Free for everyone.</strong> No paywalls and no sign-up.</li>
@@ -72,6 +80,26 @@ write('privacy/index.html', head('Privacy Policy | PHG Labs Play', 'How PHG Labs
     <p>If we change this policy, we'll update the date above. Questions? ${CONTACT}</p>
 ` + foot);
 
+write('contact/index.html', head('Contact Us | PHG Labs Play', 'Contact PHG Labs, the team behind PHG Labs Play: report a bug, suggest a game or ask about our software. WhatsApp +91 74997 03345, Karad, Maharashtra.', '/contact/') + `    <span class="eyebrow">Get in touch</span>
+    <h1>Contact us</h1>
+    <p>PHG Labs Play is made by <a href="https://phglabs.in/">PHG Labs</a>, a small software company in Karad, Maharashtra, India. We read every message.</p>
+    <h2>How to reach us</h2>
+    <ul>
+      <li><strong>WhatsApp or phone:</strong> <a href="https://wa.me/917499703345" rel="noopener">+91 74997 03345</a></li>
+      <li><strong>Website:</strong> <a href="https://phglabs.in/#contact">phglabs.in</a> (enquiry form)</li>
+      <li><strong>Office:</strong> Karad, Maharashtra, India</li>
+      <li><strong>Hours:</strong> Monday to Saturday, 10:00 AM to 7:00 PM IST</li>
+    </ul>
+    <h2>What to write to us about</h2>
+    <ul>
+      <li><strong>A wrong answer or a bug:</strong> tell us the game and the level or question number, and what you expected. A screenshot helps.</li>
+      <li><strong>Ideas:</strong> a new game, a puzzle type or a topic for the code games.</li>
+      <li><strong>Schools and colleges:</strong> if you use these games in class and want a custom set of questions.</li>
+      <li><strong>Business software:</strong> questions about our products, such as AyurOS and Shop Stock, or custom software.</li>
+    </ul>
+    <p>To learn how we handle data, see our <a href="/privacy/">privacy policy</a>.</p>
+` + foot);
+
 write('credits/index.html', head('Credits & Licences | PHG Labs Play', 'Open-source software and data used by PHG Labs Play, with their licences.', '/credits/') + `    <span class="eyebrow">Thank you</span>
     <h1>Credits &amp; licences</h1>
     <p>PHG Labs Play is built on excellent free and open-source work:</p>
@@ -90,7 +118,7 @@ write('404.html', head('Page not found | PHG Labs Play', 'This page could not be
     <p><a class="btn" href="/">Back to all games</a></p>
 ` + foot);
 
-const pages = ['/', '/output-guess/', '/bug-hunt/', '/sudoku/', '/number-series/', '/reflex/', '/digit-memory/', '/chess/', '/chess/daily/', '/chess/puzzles/', '/chess/play/', '/about/', '/privacy/', '/credits/'];
+const pages = ['/', '/output-guess/', '/bug-hunt/', '/sudoku/', '/number-series/', '/reflex/', '/digit-memory/', '/chess/', '/chess/daily/', '/chess/puzzles/', '/chess/play/', '/about/', '/contact/', '/privacy/', '/credits/'];
 fs.writeFileSync('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map((p) => `  <url><loc>https://play.phglabs.in${p}</loc></url>`).join('\n')}\n</urlset>\n`);
 fs.writeFileSync('robots.txt', 'User-agent: *\nAllow: /\n\nSitemap: https://play.phglabs.in/sitemap.xml\n');
 console.log('pages written');
