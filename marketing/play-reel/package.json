@@ -1,0 +1,18 @@
+{
+  "name": "phglabs-play-reel",
+  "private": true,
+  "description": "Instagram Reel for play.phglabs.in, rendered with TwinStudio local tools. node_modules is a junction to ../reel/node_modules.",
+  "type": "module",
+  "scripts": {
+    "voice": "node 01-voice.mjs af_heart 1.05",
+    "words": "node 02-words.mjs",
+    "capture": "node 03-capture.mjs",
+    "timeline": "node 04-timeline.mjs",
+    "stills": "node 05-render.mjs stills",
+    "render": "node 05-render.mjs",
+    "audio": "node 06-audio.mjs",
+    "mux": "C:/hari/code/twin-souls-studio/tools/ffmpeg/ffmpeg.exe -y -loglevel error -i build/video.mp4 -i build/mix.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 192k -shortest -movflags +faststart out/phglabs-play-reel.mp4",
+    "build": "npm run timeline && npm run render && npm run audio && npm run mux",
+    "all": "npm run voice && npm run words && npm run capture && npm run build"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "scenes": [
+    { "id": "hook",    "headline": "How sharp are you?", "vo": "How sharp is your brain, really? Let's find out." },
+    { "id": "code",    "headline": "Code games",         "vo": "Guess what the code prints. Then hunt down the bug." },
+    { "id": "puzzles", "headline": "Puzzles",            "vo": "Crack the number pattern, and fill the Sudoku." },
+    { "id": "brain",   "headline": "Brain tests",        "vo": "Test your reflexes, and your memory." },
+    { "id": "chess",   "headline": "Chess",              "vo": "And solve a fresh chess puzzle, every single day." },
+    { "id": "cta",     "headline": "Play free",          "vo": "It's free, with no sign-up. Play now, at play dot P H G labs dot in." }
+  ]
+}
